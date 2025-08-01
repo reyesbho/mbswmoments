@@ -42,11 +42,11 @@ function AppContent() {
   return (
     <>
       <StatusBar style="auto" />
-      <Stack>
+      <Stack screenOptions={{ headerShown: false }}>
         {isAuthenticated ? (
-           <Stack.Screen name="(main)" options={{ headerShown: false }} />
+           <Stack.Screen name="(main)" />
         ) : (
-          <Stack.Screen name="auth" options={{ headerShown: false}} />
+          <Stack.Screen name="auth" />
         )}
         <Stack.Screen name="+not-found" />
       </Stack>

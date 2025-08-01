@@ -1,3 +1,4 @@
+import { HeaderView } from '@/components/HeaderView';
 import { useOrders } from '@/hooks/useApi';
 import { Order } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
@@ -138,16 +139,9 @@ export default function OrdersScreen() {
   return (
     <View style={styles.container}>
       {/* Header */}
-      
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Pedidos</Text>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => router.push('/orders/new')}
-        >
-          <Ionicons name="add" size={24} color="white" />
-        </TouchableOpacity>
-      </View>
+      <HeaderView 
+        title="Pedidos" >
+      </HeaderView>
 
       {/* Search and Filters */}
       <View style={styles.searchContainer}>
@@ -165,6 +159,13 @@ export default function OrdersScreen() {
             </TouchableOpacity>
           )}
         </View>
+        
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => router.push('/orders/new')}
+        >
+          <Ionicons name="add" size={24} color="white" />
+        </TouchableOpacity>
       </View>
 
       {/* Filter Tabs */}
@@ -222,20 +223,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F8F9FA',
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 20,
-    backgroundColor: 'white',
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#2C3E50',
-  },
   addButton: {
     backgroundColor: '#4ECDC4',
     width: 40,
@@ -248,6 +235,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     backgroundColor: 'white',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   searchInputContainer: {
     flexDirection: 'row',

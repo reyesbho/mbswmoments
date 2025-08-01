@@ -64,7 +64,18 @@ export default function MainLayout() {
                   )
                 }}
                name="catalogs" />
-               
+              <Tabs.Screen
+                options={{
+                  title: 'Perfil',
+                  tabBarIcon: ({ color, focused }) => (
+                    <Ionicons
+                      name={focused ? 'person' : 'person-outline'}
+                      size={24}
+                      color={color}
+                    />
+                  )
+                }}
+               name="profile" />
             </Tabs>
           </>
   );

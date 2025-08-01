@@ -1,3 +1,4 @@
+import { HeaderView } from '@/components/HeaderView';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
@@ -15,21 +16,11 @@ export default function DashboardScreen() {
   return (
     <View style={styles.container}>
       
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Catalogos</Text>
-      </View>
-
+      <HeaderView title="Catalogos" />
       <View style={styles.actionsContainer}>
-      <TouchableOpacity
-          style={styles.actionButton}
-          onPress={() => router.push('/catalogs/sizes')}
-        >
-          <Ionicons name="cube-outline" size={24} color="#45B7D1" />
-          <Text style={styles.actionText}>Tamaños</Text>
-        </TouchableOpacity>
         <TouchableOpacity
           style={styles.actionButton}
-          onPress={() => router.push('/catalogs/products')}
+          onPress={() => router.push('/(catalogs)/products')}
         >
           <Ionicons name="cube-outline" size={24} color="#45B7D1" />
           <Text style={styles.actionText}>Productos</Text>

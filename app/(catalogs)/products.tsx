@@ -1,3 +1,5 @@
+import { HeaderView } from '@/components/HeaderView';
+import { ProductItem } from '@/components/ProductItem';
 import { useCreateProduct, useDeleteProduct, useProducts, useUpdateProduct, useUpdateProductStatus } from '@/hooks/useApi';
 import { Product } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
@@ -6,13 +8,12 @@ import React, { useState } from 'react';
 import {
   Alert,
   FlatList,
-  Image,
   Modal,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 
 export default function ProductsScreen() {
@@ -75,73 +76,12 @@ export default function ProductsScreen() {
     }
   };
 
-  const renderProductItem = ({ item: product }: { item: Product }) => (
-    <View style={styles.productCard}>
-      <View style={styles.productHeader}>
-        
-        {product.imagen && (
-          <View style={styles.imageContainer}>
-            <Image source={{ uri: product.imagen }} style={styles.productImage} />
-          </View>
-        )}
-      
-        <View style={styles.productInfo}>
-          <Text style={styles.productName}>{product.descripcion}</Text>
-          {product.tag && (
-            <Text style={styles.productTag}>#{product.tag}</Text>
-          )}
-        </View>
-        <View style={styles.productActions}>
-          <TouchableOpacity
-            onPress={() => handleToggleStatus(product)}
-            style={[
-              styles.statusButton,
-              { backgroundColor: product.estatus ? '#27AE60' : '#E74C3C' },
-            ]}
-          >
-            <Ionicons
-              name={product.estatus ? 'checkmark-circle' : 'close-circle'}
-              size={16}
-              color="white"
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => handleEditProduct(product)}
-            style={styles.actionButton}
-          >
-            <Ionicons name="create-outline" size={20} color="#4ECDC4" />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => handleDeleteProduct(product)}
-            style={styles.actionButton}
-          >
-            <Ionicons name="trash-outline" size={20} color="#E74C3C" />
-          </TouchableOpacity>
-        </View>
-      </View>
-      <View style={styles.productStatus}>
-        <Text style={[
-          styles.statusText,
-          { color: product.estatus ? '#27AE60' : '#E74C3C' },
-        ]}>
-          {product.estatus ? 'Activo' : 'Inactivo'}
-        </Text>
-      </View>
-    </View>
-  );
+  
 
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#2C3E50" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Productos</Text>
-        <TouchableOpacity onPress={handleAddProduct} style={styles.addButton}>
-          <Ionicons name="add" size={24} color="white" />
-        </TouchableOpacity>
-      </View>
+        <HeaderView title="Productos" hasBackButton={true} />
 
       {/* Search */}
       <View style={styles.searchContainer}>
@@ -159,12 +99,16 @@ export default function ProductsScreen() {
             </TouchableOpacity>
           )}
         </View>
+        
+          <TouchableOpacity onPress={handleAddProduct} style={styles.addButton}>
+            <Ionicons name="add" size={24} color="white" />
+          </TouchableOpacity>
       </View>
 
       {/* Products List */}
       <FlatList
         data={filteredProducts}
-        renderItem={renderProductItem}
+        renderItem={({ item }) => <ProductItem product={item} handleToggleStatus={handleToggleStatus} handleEditProduct={handleEditProduct} handleDeleteProduct={handleDeleteProduct} />}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.productsList}
         showsVerticalScrollIndicator={false}
@@ -369,6 +313,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     backgroundColor: 'white',
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   searchInputContainer: {
     flexDirection: 'row',
