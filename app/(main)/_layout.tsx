@@ -1,54 +1,70 @@
+import { useAuth } from '@/contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
+import { Alert } from 'react-native';
 
 
 export default function MainLayout() {
 
+  
+  const { user, logout, redirectToAuth } = useAuth();
+  const handleLogout = async () => {
+    Alert.alert(
+      'Cerrar Sesión',
+      '¿Estás seguro de que quieres cerrar sesión?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Cerrar Sesión',
+          style: 'destructive',
+          onPress: logout,
+        },
+      ]
+    );
+  };
+
   return (
-    <>
-              <Tabs
-                screenOptions={{
-                  tabBarActiveTintColor: '#4ECDC4',
-                  tabBarInactiveTintColor: '#7F8C8D',
-                  tabBarStyle: {
-                    backgroundColor: 'white',
-                    borderTopWidth: 1,
-                    borderTopColor: '#E9ECEF',
-                    paddingBottom: 5,
-                    paddingTop: 5,
-                    height: 60,
-                  },
-                  headerShown: false,
-                }}
-              >
+          <>
+           <Tabs screenOptions={{
+              tabBarPosition: 'top',
+              headerShown: false,
+              tabBarActiveTintColor: '#4ECDC4',
+              tabBarInactiveTintColor: '#7F8C8D',
+              tabBarStyle: {
+                backgroundColor: 'white',
+                borderTopWidth: 1,
+                borderTopColor: '#E9ECEF',
+                paddingBottom: 5,
+                paddingTop: 5,
+                height: 65,
+              },
+            }}>
+              <Tabs.Screen 
+              
+              options={{
+                title: 'Home',
+                tabBarIcon: ({ color, focused }) => (
+                  <Ionicons
+                    name={focused ? 'home' : 'home-outline'}
+                    size={24}
+                    color={color}
+                  />
+                )
+              }}
+               name="index"  />
               <Tabs.Screen
-                name="index"
                 options={{
-                  title: 'Home',
+                  title: 'Catalogos',
                   tabBarIcon: ({ color, focused }) => (
                     <Ionicons
-                      name={focused ? 'home' : 'home-outline'}
+                      name={focused ? 'list' : 'list-outline'}
                       size={24}
                       color={color}
                     />
-                  ),
-                  headerShown: false,
+                  )
                 }}
-              />
-                <Tabs.Screen
-                  name="pedidos"
-                  options={{
-                    title: 'Pedidos',
-                    tabBarIcon: ({ color, focused }) => (
-                      <Ionicons
-                        name={focused ? 'list' : 'list-outline'}
-                        size={24}
-                        color={color}
-                      />
-                    ),
-                    headerShown: false,
-                  }}
-                />
+               name="catalogs" />
+               
             </Tabs>
           </>
   );

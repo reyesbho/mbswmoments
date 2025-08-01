@@ -5,12 +5,13 @@ import { format } from 'date-fns';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
 import {
-    Alert,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 export default function OrderDetailScreen() {
@@ -145,7 +146,9 @@ export default function OrderDetailScreen() {
           <Text style={styles.sectionTitle}>Productos</Text>
           {order.productos.map((producto, index) => (
             <View key={index} style={styles.productCard}>
+              
               <View style={styles.productHeader}>
+                <Image source={{uri: producto.producto.imagen}} style={styles.productImage}></Image>
                 <Text style={styles.productName}>{producto.producto.descripcion}</Text>
                 <Text style={styles.productQuantity}>x{producto.cantidad}</Text>
               </View>
@@ -186,6 +189,11 @@ export default function OrderDetailScreen() {
 }
 
 const styles = StyleSheet.create({
+  productImage: {
+    width: 30,
+    height: 30,
+    borderRadius: 4,
+  },
   container: {
     flex: 1,
     backgroundColor: '#F8F9FA',
@@ -324,6 +332,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 8,
+    gap:10,
   },
   productName: {
     fontSize: 16,

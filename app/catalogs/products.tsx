@@ -4,14 +4,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    Alert,
-    FlatList,
-    Modal,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  FlatList,
+  Image,
+  Modal,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 export default function ProductsScreen() {
@@ -77,6 +78,13 @@ export default function ProductsScreen() {
   const renderProductItem = ({ item: product }: { item: Product }) => (
     <View style={styles.productCard}>
       <View style={styles.productHeader}>
+        
+        {product.imagen && (
+          <View style={styles.imageContainer}>
+            <Image source={{ uri: product.imagen }} style={styles.productImage} />
+          </View>
+        )}
+      
         <View style={styles.productInfo}>
           <Text style={styles.productName}>{product.descripcion}</Text>
           {product.tag && (
@@ -111,13 +119,6 @@ export default function ProductsScreen() {
           </TouchableOpacity>
         </View>
       </View>
-      
-      {product.imagen && (
-        <View style={styles.imageContainer}>
-          <Text style={styles.imageText}>📷 Imagen disponible</Text>
-        </View>
-      )}
-      
       <View style={styles.productStatus}>
         <Text style={[
           styles.statusText,
@@ -192,7 +193,7 @@ export default function ProductsScreen() {
             if (editingProduct) {
               await updateProductMutation.mutateAsync({
                 id: editingProduct.id,
-                ...productData,
+                product: productData,
               });
               Alert.alert('Éxito', 'Producto actualizado correctamente');
             } else {
@@ -329,6 +330,11 @@ function ProductModal({ visible, product, onClose, onSave }: ProductModalProps) 
 }
 
 const styles = StyleSheet.create({
+  productImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+  },
   container: {
     flex: 1,
     backgroundColor: '#F8F9FA',
@@ -398,6 +404,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: 12,
+    gap:10,
+    alignContent:'center',
   },
   productInfo: {
     flex: 1,
@@ -430,6 +438,7 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 8,
     marginBottom: 8,
+
   },
   imageText: {
     fontSize: 12,
