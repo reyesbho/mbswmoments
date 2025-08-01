@@ -50,7 +50,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Function to redirect to orders page (main page)
   const redirectToOrders = () => {
     console.log('🔄 Redirecting to orders page (main)');
-    router.replace('/(tabs)/explore');
+    router.replace('/(main)');
   };
 
   // Prevent redirect during initial auth check
@@ -79,10 +79,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setIsLoading(false);
           return;
         }
-        
-        // Try to fetch orders to validate authentication
-        const orders = await apiService.getOrders();
-        console.log('✅ Authentication valid, user is logged in');
         
         // If we can fetch orders, user is authenticated
         // Create a user object (we don't have user details from this call)

@@ -26,12 +26,6 @@ export default function DashboardScreen() {
   // Ensure orders is always an array
   const orders = Array.isArray(ordersData) ? ordersData : [];
   
-  // Debug logs
-  useEffect(() => {
-    console.log('📋 Orders data type:', typeof ordersData);
-    console.log('📋 Orders data:', ordersData);
-    console.log('📋 Orders array:', orders);
-  }, [ordersData, orders]);
 
   // Handle authentication errors
   useEffect(() => {
@@ -146,7 +140,6 @@ export default function DashboardScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
         <View>
           <Text style={styles.welcomeText}>¡Hola!</Text>
@@ -157,11 +150,10 @@ export default function DashboardScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Main Action Button */}
       <View style={styles.mainActionContainer}>
         <TouchableOpacity
           style={styles.mainActionButton}
-          onPress={() => router.push('/(tabs)/explore')}
+          onPress={() => router.push('/pedidos')}
         >
           <Ionicons name="list" size={32} color="white" />
           <Text style={styles.mainActionText}>Ver Todos los Pedidos</Text>
@@ -171,7 +163,6 @@ export default function DashboardScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Stats */}
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
           <Ionicons name="list-outline" size={24} color="#4ECDC4" />
@@ -220,7 +211,7 @@ export default function DashboardScreen() {
       <View style={styles.recentContainer}>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Pedidos Recientes</Text>
-          <TouchableOpacity onPress={() => router.push('/(tabs)/explore')}>
+          <TouchableOpacity onPress={() => router.push('/')}>
             <Text style={styles.seeAllText}>Ver todos</Text>
           </TouchableOpacity>
         </View>

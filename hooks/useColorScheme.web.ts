@@ -1,3 +1,4 @@
+import { Colors, ColorUtils } from '@/constants/Colors';
 import { useEffect, useState } from 'react';
 import { useColorScheme as useRNColorScheme } from 'react-native';
 
@@ -19,3 +20,14 @@ export function useColorScheme() {
 
   return 'light';
 }
+
+export const useTheme = () => {
+  const colorScheme = useColorScheme();
+  return {
+    colors: Colors[colorScheme],
+    colorScheme,
+    isDark: colorScheme === 'dark',
+    isLight: colorScheme === 'light',
+    ColorUtils,
+  };
+};
