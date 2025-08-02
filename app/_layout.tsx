@@ -1,9 +1,8 @@
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
-import { ThemeProvider, useAppTheme } from '@/contexts/ThemeContext';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { useEffect } from 'react';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -12,7 +11,6 @@ const queryClient = new QueryClient({
       retry: (failureCount, error: any) => {
         // Don't retry 401 errors to prevent cycling
         if (error?.message?.includes('Unauthorized') || error?.response?.status === 401) {
-          console.log('🚫 Not retrying 401 error');
           return false;
         }
         // Only retry once for other errors
@@ -28,29 +26,28 @@ const queryClient = new QueryClient({
 
 function AppContent() {
   const { isAuthenticated, isLoading } = useAuth();
-  const { colors } = useAppTheme();
-  console.log('Auth state:', { isAuthenticated, isLoading }); // Debug log
+
+  useEffect(() => {
+    // Handle 401 errors globally
+    const handleUnauthorized = () => {
+      // This will be handled by the API service
+    };
+
+    // Add any global error handling here
+  }, []);
 
   if (isLoading) {
-    return (
-      <View style={[styles.loadingContainer, { backgroundColor: colors.background }]}>
-        <Text style={[styles.loadingText, { color: colors.textSecondary }]}>Cargando...</Text>
-      </View>
-    );
+    return null; // Or a loading screen
   }
 
   return (
-    <>
-      <StatusBar style="auto" />
-      <Stack screenOptions={{ headerShown: false }}>
-        {isAuthenticated ? (
-           <Stack.Screen name="(main)" />
-        ) : (
-          <Stack.Screen name="auth" />
-        )}
-        <Stack.Screen name="+not-found" />
-      </Stack>
-    </>
+    <Stack screenOptions={{ headerShown: false }}>
+      {isAuthenticated ? (
+        <Stack.Screen name="(main)" />
+      ) : (
+        <Stack.Screen name="auth" />
+      )}
+    </Stack>
   );
 }
 
@@ -65,14 +62,3 @@ export default function RootLayout() {
     </QueryClientProvider>
   );
 }
-
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    fontSize: 16,
-  },
-});

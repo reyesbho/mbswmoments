@@ -32,24 +32,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const isAuthenticated = !!user;
 
-  console.log('AuthProvider state:', { user, isAuthenticated, isLoading });
 
   // Function to redirect to auth page
   const redirectToAuth = () => {
     // Don't redirect during initial auth check
     if (isInitialAuthCheck) {
-      console.log('⏸️ Skipping redirect during initial auth check');
       return;
     }
     
-    console.log('🔄 Redirecting to auth page');
     setUser(null);
     router.replace('/auth');
   };
 
   // Function to redirect to orders page (main page)
   const redirectToOrders = () => {
-    console.log('🔄 Redirecting to orders page (main)');
     router.replace('/(main)');
   };
 
@@ -69,12 +65,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        console.log('🔍 Checking for existing authentication...');
         
         // Check if we have a token first
         const token = await AsyncStorage.getItem('auth_token');
         if (!token) {
-          console.log('❌ No token found, user not authenticated');
           setUser(null);
           setIsLoading(false);
           return;
@@ -89,7 +83,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         setUser(userData);
       } catch (error: any) {
-        console.log('❌ No valid authentication found:', error.message);
         setUser(null);
         // Don't redirect here, let the user stay on current page
       } finally {
@@ -110,11 +103,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         email,
         token: response.token,
       };
-      console.log('Login successful, setting user:', userData);
       setUser(userData);
       redirectToOrders();
     } catch (error) {
-      console.error('Login failed:', error);
       setUser(null);
       redirectToAuth();
     } finally {
@@ -131,11 +122,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         email: response.email,
         token: response.token,
       };
-      console.log('Register successful, setting user:', userData);
       setUser(userData);
       redirectToOrders();
     } catch (error) {
-      console.error('Registration failed:', error);
       setUser(null);
       redirectToAuth();
     } finally {
@@ -147,11 +136,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setIsLoading(true);
       await logoutMutation.mutateAsync();
-      console.log('Logout successful, clearing user');
       setUser(null);
       redirectToAuth();
     } catch (error) {
-      console.error('Logout failed:', error);
       setUser(null);
       redirectToAuth();
     } finally {

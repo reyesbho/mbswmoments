@@ -6,14 +6,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  Alert,
-  FlatList,
-  Modal,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View
+    Alert,
+    FlatList,
+    Modal,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View
 } from 'react-native';
 
 export default function ProductsScreen() {
@@ -76,12 +76,10 @@ export default function ProductsScreen() {
     }
   };
 
-  
-
   return (
     <View style={styles.container}>
       {/* Header */}
-        <HeaderView title="Productos" hasBackButton={true} />
+      <HeaderView title="Productos" hasBackButton={true} />
 
       {/* Search */}
       <View style={styles.searchContainer}>
@@ -100,9 +98,9 @@ export default function ProductsScreen() {
           )}
         </View>
         
-          <TouchableOpacity onPress={handleAddProduct} style={styles.addButton}>
-            <Ionicons name="add" size={24} color="white" />
-          </TouchableOpacity>
+        <TouchableOpacity onPress={handleAddProduct} style={styles.addButton}>
+          <Ionicons name="add" size={24} color="white" />
+        </TouchableOpacity>
       </View>
 
       {/* Products List */}
@@ -274,32 +272,9 @@ function ProductModal({ visible, product, onClose, onSave }: ProductModalProps) 
 }
 
 const styles = StyleSheet.create({
-  productImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 8,
-  },
   container: {
     flex: 1,
     backgroundColor: '#F8F9FA',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 60,
-    paddingBottom: 20,
-    backgroundColor: 'white',
-  },
-  backButton: {
-    padding: 8,
-  },
-  headerTitle: {
-    flex: 1,
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#2C3E50',
-    textAlign: 'center',
   },
   addButton: {
     backgroundColor: '#4ECDC4',
@@ -335,70 +310,6 @@ const styles = StyleSheet.create({
   productsList: {
     paddingHorizontal: 20,
     paddingTop: 16,
-  },
-  productCard: {
-    backgroundColor: 'white',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  productHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 12,
-    gap:10,
-    alignContent:'center',
-  },
-  productInfo: {
-    flex: 1,
-  },
-  productName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#2C3E50',
-    marginBottom: 4,
-  },
-  productTag: {
-    fontSize: 12,
-    color: '#4ECDC4',
-    fontWeight: '500',
-  },
-  productActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  statusButton: {
-    padding: 4,
-    borderRadius: 4,
-  },
-  actionButton: {
-    padding: 4,
-  },
-  imageContainer: {
-    backgroundColor: '#F8F9FA',
-    padding: 8,
-    borderRadius: 8,
-    marginBottom: 8,
-
-  },
-  imageText: {
-    fontSize: 12,
-    color: '#7F8C8D',
-    textAlign: 'center',
-  },
-  productStatus: {
-    alignItems: 'flex-end',
-  },
-  statusText: {
-    fontSize: 12,
-    fontWeight: '500',
   },
   emptyState: {
     flex: 1,
