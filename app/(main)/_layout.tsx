@@ -36,7 +36,8 @@ export default function MainLayout() {
                 borderTopColor: '#E9ECEF',
                 paddingBottom: 5,
                 paddingTop: 5,
-                height: 65,
+                height: 55,
+                marginTop: 35,
               },
             }}>
               <Tabs.Screen 
@@ -46,7 +47,7 @@ export default function MainLayout() {
                 tabBarIcon: ({ color, focused }) => (
                   <Ionicons
                     name={focused ? 'home' : 'home-outline'}
-                    size={24}
+                    size={20}
                     color={color}
                   />
                 )
@@ -58,7 +59,7 @@ export default function MainLayout() {
                   tabBarIcon: ({ color, focused }) => (
                     <Ionicons
                       name={focused ? 'list' : 'list-outline'}
-                      size={24}
+                      size={20}
                       color={color}
                     />
                   )
@@ -70,7 +71,7 @@ export default function MainLayout() {
                   tabBarIcon: ({ color, focused }) => (
                     <Ionicons
                       name={focused ? 'person' : 'person-outline'}
-                      size={24}
+                      size={20}
                       color={color}
                     />
                   )
