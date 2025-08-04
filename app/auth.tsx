@@ -1,17 +1,17 @@
 import { useAuth } from '@/contexts/AuthContext';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 export default function AuthScreen() {
@@ -52,7 +52,7 @@ export default function AuthScreen() {
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <Ionicons name="cake-outline" size={80} color="#4ECDC4" />
+          <MaterialCommunityIcons name="cake-variant-outline" size={80} color="#4ECDC4" />
           <Text style={styles.title}>Pastelería</Text>
           <Text style={styles.subtitle}>Gestión de Pedidos</Text>
         </View>
