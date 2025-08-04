@@ -3,7 +3,6 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -11,7 +10,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 
 export default function AuthScreen() {
@@ -21,15 +20,17 @@ export default function AuthScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+
 
   const handleSubmit = async () => {
     if (!email.trim() || !password.trim()) {
-      Alert.alert('Error', 'Por favor complete todos los campos');
+      setErrorMessage('Por favor complete todos los campos');
       return;
     }
 
     if (!isLogin && password !== confirmPassword) {
-      Alert.alert('Error', 'Las contraseñas no coinciden');
+      setErrorMessage('Las contraseñas no coinciden');
       return;
     }
 
@@ -40,8 +41,12 @@ export default function AuthScreen() {
         await register(email, password);
       }
       // Navigation will be handled by the auth context
-    } catch (error: any) {
-      Alert.alert('Error', error.message || 'Error de autenticación');
+    }catch (error: any) {
+      const message = typeof error === 'string'
+        ? error
+        : error?.message || 'Error de autenticación';
+      setErrorMessage(message);
+      return;
     }
   };
 
@@ -95,6 +100,10 @@ export default function AuthScreen() {
             </View>
           )}
 
+          {errorMessage ? (
+            <Text style={styles.errorText}>{errorMessage}</Text>
+          ) : null}
+
           <TouchableOpacity
             style={[styles.submitButton, isLoading && styles.submitButtonDisabled]}
             onPress={handleSubmit}
@@ -111,7 +120,7 @@ export default function AuthScreen() {
 
           <TouchableOpacity
             style={styles.switchButton}
-            onPress={() => setIsLogin(!isLogin)}
+            onPress={() => {setIsLogin(!isLogin);setErrorMessage('');}}
           >
             <Text style={styles.switchButtonText}>
               {isLogin
@@ -132,6 +141,13 @@ export default function AuthScreen() {
 }
 
 const styles = StyleSheet.create({
+  errorText: {
+    color: '#E74C3C',
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 8,
+    marginBottom: 8,
+  },
   container: {
     flex: 1,
     backgroundColor: '#F8F9FA',

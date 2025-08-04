@@ -106,8 +106,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       setUser(userData);
       redirectToOrders();
     } catch (error) {
-      setUser(null);
-      redirectToAuth();
+        throw error;
     } finally {
       setIsLoading(false);
     }

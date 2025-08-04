@@ -1,16 +1,24 @@
 import { apiService } from '@/services/api';
 import { LoginForm, Order, Product, RegisterForm, SizeProduct } from '@/types';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 
 // Auth hooks
 export const useLogin = () => {
   return useMutation({
     mutationFn: async ({ email, password }: LoginForm) => {
-      return apiService.login(email, password);
+      try {
+        return await apiService.login(email, password);
+      } catch (error: any) {
+        const axiosError = error as AxiosError;
+
+        if (axiosError?.response?.status === 500) {
+          throw new Error('Error del servidor');
+        }
+        throw new Error('Credenciales incorrectas');
+      }
     },
     retry: false, // No retry for auth errors
-    onError: (error) => {
-    },
   });
 };
 
@@ -65,7 +73,6 @@ export const useCreateProduct = () => {
     },
     retry: false, // No retry for mutations
     onError: (error) => {
-      console.error('❌ Create product failed:', error);
     },
   });
 };
@@ -77,7 +84,6 @@ export const useUpdateProduct = () => {
     },
     retry: false,
     onError: (error) => {
-      console.error('❌ Update product failed:', error);
     },
   });
 };
@@ -89,7 +95,6 @@ export const useUpdateProductStatus = () => {
     },
     retry: false,
     onError: (error) => {
-      console.error('❌ Update product status failed:', error);
     },
   });
 };
@@ -101,7 +106,6 @@ export const useDeleteProduct = () => {
     },
     retry: false,
     onError: (error) => {
-      console.error('❌ Delete product failed:', error);
     },
   });
 };
@@ -135,7 +139,6 @@ export const useCreateSize = () => {
     },
     retry: false,
     onError: (error) => {
-      console.error('❌ Create size failed:', error);
     },
   });
 };
@@ -147,7 +150,6 @@ export const useUpdateSize = () => {
     },
     retry: false,
     onError: (error) => {
-      console.error('❌ Update size failed:', error);
     },
   });
 };
@@ -159,7 +161,6 @@ export const useUpdateSizeStatus = () => {
     },
     retry: false,
     onError: (error) => {
-      console.error('❌ Update size status failed:', error);
     },
   });
 };
@@ -193,7 +194,6 @@ export const useCreateOrder = () => {
     },
     retry: false,
     onError: (error) => {
-      console.error('❌ Create order failed:', error);
     },
   });
 };
@@ -205,7 +205,6 @@ export const useUpdateOrder = () => {
     },
     retry: false,
     onError: (error) => {
-      console.error('❌ Update order failed:', error);
     },
   });
 }; 

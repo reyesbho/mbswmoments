@@ -4,7 +4,7 @@ import axios, { AxiosInstance, AxiosResponse } from 'axios';
 
 class ApiService {
   private api: AxiosInstance;
-  private baseURL = 'http://192.168.3.10:3000';
+  private baseURL = 'http://192.168.3.19:3000';
   private onUnauthorized?: () => void;
   private tokenKey = 'auth_token'; // Para localStorage
 
@@ -22,6 +22,9 @@ class ApiService {
     // Request interceptor
     this.api.interceptors.request.use(
       async (config) => {
+        if (config.url?.includes('/user/login') || config.url?.includes('/user/register')) {
+          return config;
+        }
         // Add token from storage if available
         const token = await this.getTokenFromStorage();
         if (token) {
@@ -46,7 +49,9 @@ class ApiService {
         return response;
       },
       async (error) => {
-        if (error.response?.status === 401) {
+        if (error.response?.status === 401
+           && !(error.config?.url?.includes('/user/login') || error.config?.url?.includes('/user/register'))
+        ) {
           // Clear token on unauthorized
           await this.clearTokenFromStorage();
           
@@ -59,7 +64,6 @@ class ApiService {
           // Don't retry 401 errors, just redirect
           return Promise.reject(new Error('Unauthorized - Please login again'));
         }
-        
         return Promise.reject(error);
       }
     );
