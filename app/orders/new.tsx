@@ -5,14 +5,14 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    Alert,
-    Modal,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 interface FormData {
@@ -36,6 +36,7 @@ export default function NewOrderScreen() {
   });
   
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
   const [showProductModal, setShowProductModal] = useState(false);
 
   const handleInputChange = (field: keyof FormData, value: string | Date) => {
@@ -72,7 +73,16 @@ export default function NewOrderScreen() {
     }
 
     try {
-      await createOrderMutation.mutateAsync(formData);
+      // Convert Date to Firebase Timestamp format
+      const orderData = {
+        ...formData,
+        fechaEntrega: {
+          seconds: Math.floor(formData.fechaEntrega.getTime() / 1000),
+          nanoseconds: (formData.fechaEntrega.getTime() % 1000) * 1000000,
+        },
+      };
+
+      await createOrderMutation.mutateAsync(orderData);
       Alert.alert('Éxito', 'Pedido creado correctamente', [
         { text: 'OK', onPress: () => router.back() },
       ]);
@@ -127,21 +137,33 @@ export default function NewOrderScreen() {
           
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Fecha de Entrega</Text>
-            <TouchableOpacity
-              style={styles.dateButton}
-              onPress={() => setShowDatePicker(true)}
-            >
-              <Ionicons name="calendar-outline" size={20} color="#7F8C8D" />
-              <Text style={styles.dateButtonText}>
-                {formData.fechaEntrega.toLocaleDateString('es-ES', {
-                  year: 'numeric',
-                  month: '2-digit',
-                  day: '2-digit',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                })}
-              </Text>
-            </TouchableOpacity>
+            <View style={styles.dateTimeContainer}>
+              <TouchableOpacity
+                style={styles.dateButton}
+                onPress={() => setShowDatePicker(true)}
+              >
+                <Ionicons name="calendar-outline" size={20} color="#7F8C8D" />
+                <Text style={styles.dateButtonText}>
+                  {formData.fechaEntrega.toLocaleDateString('es-ES', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                  })}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.timeButton}
+                onPress={() => setShowTimePicker(true)}
+              >
+                <Ionicons name="time-outline" size={20} color="#7F8C8D" />
+                <Text style={styles.timeButtonText}>
+                  {formData.fechaEntrega.toLocaleTimeString('es-ES', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  })}
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
 
@@ -216,12 +238,37 @@ export default function NewOrderScreen() {
       {showDatePicker && (
         <DateTimePicker
           value={formData.fechaEntrega}
-          mode="datetime"
+          mode="date"
           display="default"
           onChange={(event, selectedDate) => {
             setShowDatePicker(false);
-            if (selectedDate) {
-              handleInputChange('fechaEntrega', selectedDate);
+            if (event.type === 'set' && selectedDate) {
+              // Preserve the current time when changing date
+              const newDate = new Date(selectedDate);
+              newDate.setHours(formData.fechaEntrega.getHours());
+              newDate.setMinutes(formData.fechaEntrega.getMinutes());
+              handleInputChange('fechaEntrega', newDate);
+            }
+          }}
+        />
+      )}
+
+      {/* Time Picker Modal */}
+      {showTimePicker && (
+        <DateTimePicker
+          value={formData.fechaEntrega}
+          mode="time"
+          display="default"
+          is24Hour={false}
+          minuteInterval={15}
+          onChange={(event, selectedDate) => {
+            setShowTimePicker(false);
+            if (event.type === 'set' && selectedDate) {
+              // Preserve the current date when changing time
+              const newDate = new Date(formData.fechaEntrega);
+              newDate.setHours(selectedDate.getHours());
+              newDate.setMinutes(selectedDate.getMinutes());
+              handleInputChange('fechaEntrega', newDate);
             }
           }}
         />
@@ -278,6 +325,15 @@ function ProductSelectionModal({
     setCaracteristicas(prev => prev.filter((_, i) => i !== index));
   };
 
+  const resetForm = () => {
+    setSelectedProduct(null);
+    setSelectedSize(null);
+    setCantidad('1');
+    setPrecio('');
+    setCaracteristicas([]);
+    setNuevaCaracteristica('');
+  };
+
   const handleConfirm = () => {
     if (!selectedProduct || !selectedSize || !cantidad || !precio) {
       Alert.alert('Error', 'Complete todos los campos requeridos');
@@ -300,13 +356,12 @@ function ProductSelectionModal({
     };
 
     onAddProduct(producto);
-    
-    // Reset form
-    setSelectedProduct(null);
-    setSelectedSize(null);
-    setCantidad('1');
-    setPrecio('');
-    setCaracteristicas([]);
+    resetForm();
+  };
+
+  const handleClose = () => {
+    resetForm();
+    onClose();
   };
 
   return (
@@ -316,12 +371,12 @@ function ProductSelectionModal({
       presentationStyle="pageSheet"
     >
       <View style={styles.modalContainer}>
-        <View style={styles.modalHeader}>
-          <Text style={styles.modalTitle}>Agregar Producto</Text>
-          <TouchableOpacity onPress={onClose}>
-            <Ionicons name="close" size={24} color="#2C3E50" />
-          </TouchableOpacity>
-        </View>
+                 <View style={styles.modalHeader}>
+           <Text style={styles.modalTitle}>Agregar Producto</Text>
+           <TouchableOpacity onPress={handleClose}>
+             <Ionicons name="close" size={24} color="#2C3E50" />
+           </TouchableOpacity>
+         </View>
 
         <ScrollView style={styles.modalContent}>
           {/* Product Selection */}
@@ -424,14 +479,14 @@ function ProductSelectionModal({
           </View>
         </ScrollView>
 
-        <View style={styles.modalFooter}>
-          <TouchableOpacity onPress={onClose} style={styles.cancelButton}>
-            <Text style={styles.cancelButtonText}>Cancelar</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleConfirm} style={styles.confirmButton}>
-            <Text style={styles.confirmButtonText}>Agregar</Text>
-          </TouchableOpacity>
-        </View>
+                 <View style={styles.modalFooter}>
+           <TouchableOpacity onPress={handleClose} style={styles.cancelButton}>
+             <Text style={styles.cancelButtonText}>Cancelar</Text>
+           </TouchableOpacity>
+           <TouchableOpacity onPress={handleConfirm} style={styles.confirmButton}>
+             <Text style={styles.confirmButtonText}>Agregar</Text>
+           </TouchableOpacity>
+         </View>
       </View>
     </Modal>
   );
@@ -501,7 +556,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E9ECEF',
   },
+  dateTimeContainer: {
+    flexDirection: 'row',
+    gap: 12,
+  },
   dateButton: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'white',
@@ -511,6 +571,21 @@ const styles = StyleSheet.create({
     borderColor: '#E9ECEF',
   },
   dateButtonText: {
+    marginLeft: 8,
+    fontSize: 16,
+    color: '#2C3E50',
+  },
+  timeButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    padding: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E9ECEF',
+  },
+  timeButtonText: {
     marginLeft: 8,
     fontSize: 16,
     color: '#2C3E50',
