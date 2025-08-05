@@ -1,24 +1,21 @@
 import { apiService } from '@/services/api';
-import { LoginForm, Order, Product, RegisterForm, SizeProduct } from '@/types';
+import { Order, Product, RegisterForm, SizeProduct } from '@/types';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 
 // Auth hooks
 export const useLogin = () => {
   return useMutation({
-    mutationFn: async ({ email, password }: LoginForm) => {
-      try {
-        return await apiService.login(email, password);
-      } catch (error: any) {
-        const axiosError = error as AxiosError;
-
-        if (axiosError?.response?.status === 500) {
-          throw new Error('Error del servidor');
-        }
-        throw new Error('Credenciales incorrectas');
-      }
+    mutationFn: async ({ email, password }: RegisterForm) => {
+      return apiService.login(email, password);
     },
     retry: false, // No retry for auth errors
+    onError: (error:AxiosError) => {
+        if (error.status === 500 || error.message.includes('Network Error'))
+            throw new Error('Servicio no disponible');
+
+        throw new Error('Credenciales incorrectas');
+    },
   });
 };
 

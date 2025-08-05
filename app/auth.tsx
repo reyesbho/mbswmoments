@@ -117,17 +117,6 @@ export default function AuthScreen() {
               </Text>
             )}
           </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.switchButton}
-            onPress={() => {setIsLogin(!isLogin);setErrorMessage('');}}
-          >
-            <Text style={styles.switchButtonText}>
-              {isLogin
-                ? '¿No tienes cuenta? Regístrate'
-                : '¿Ya tienes cuenta? Inicia sesión'}
-            </Text>
-          </TouchableOpacity>
         </View>
 
         <View style={styles.footer}>

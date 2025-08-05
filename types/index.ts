@@ -82,7 +82,7 @@ export interface LoginForm {
 export interface RegisterForm {
   email: string;
   password: string;
-  confirmPassword: string;
+  confirmPassword?: string;
 }
 
 export interface CreateProductForm {
