@@ -1,6 +1,6 @@
 import { apiService } from '@/services/api';
 import { Order, Product, RegisterForm, SizeProduct } from '@/types';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
 
 // Auth hooks
@@ -185,6 +185,8 @@ export const useOrder = (id: string) => {
 };
 
 export const useCreateOrder = () => {
+  const queryClient = useQueryClient();
+  
   return useMutation({
     mutationFn: async (order: Omit<Order, 'id'>) => {
       return apiService.createOrder(order);
@@ -192,16 +194,26 @@ export const useCreateOrder = () => {
     retry: false,
     onError: (error) => {
     },
+    onSuccess: () => {
+      // Invalidate and refetch orders query to update the list
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+    },
   });
 };
 
 export const useUpdateOrder = () => {
+  const queryClient = useQueryClient();
+  
   return useMutation({
     mutationFn: async ({ id, order }: { id: string; order: Partial<Order> }) => {
       return apiService.updateOrder(id, order);
     },
     retry: false,
     onError: (error) => {
+    },
+    onSuccess: () => {
+      // Invalidate and refetch orders query to update the list
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
     },
   });
 }; 

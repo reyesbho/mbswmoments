@@ -45,6 +45,7 @@ export interface Order {
   lugarEntrega?: string;
   cliente: string;
   productos: OrderProduct[];
+  estatus?: 'PENDING' | 'DONE' | 'CANCELED' | 'INCOMPLETE' | 'BACKLOG';
 }
 
 export interface AuthResponse {

@@ -1,11 +1,12 @@
 import { HeaderView } from '@/components/HeaderView';
-import { useOrders } from '@/hooks/useApi';
+import { useOrders, useUpdateOrder } from '@/hooks/useApi';
 import { Order } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { format } from 'date-fns';
 import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import {
+  Alert,
   FlatList,
   StyleSheet,
   Text,
@@ -13,12 +14,28 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
+import Animated, { useAnimatedStyle, withRepeat, withTiming } from 'react-native-reanimated';
 
 export default function OrdersScreen() {
   const router = useRouter();
   const { data: orders, isLoading } = useOrders();
+  const updateOrderMutation = useUpdateOrder();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'today' | 'upcoming'>('all');
+  const [filterOrderStatus, setFilterOrderStatus] = useState<'INCOMPLETE' | 'BACKLOG' | 'DONE'>('BACKLOG');
+
+  // Suppress deprecation warning for Swipeable
+  React.useEffect(() => {
+    const originalWarn = console.warn;
+    console.warn = (...args) => {
+      if (args[0]?.includes?.('Swipeable')) return;
+      originalWarn.apply(console, args);
+    };
+    return () => {
+      console.warn = originalWarn;
+    };
+  }, []);
 
   
 
@@ -40,6 +57,8 @@ export default function OrdersScreen() {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     
+    
+    
     switch (filterStatus) {
       case 'today':
         filtered = filtered.filter(order => {
@@ -56,6 +75,18 @@ export default function OrdersScreen() {
       default:
         break;
     }
+
+    switch (filterOrderStatus) {
+      case 'INCOMPLETE':
+        filtered = filtered.filter(order => order.estatus === 'INCOMPLETE');
+        break;
+      case 'BACKLOG':
+        filtered = filtered.filter(order => order.estatus === 'BACKLOG');
+        break;
+      case 'DONE':
+        filtered = filtered.filter(order => order.estatus === 'DONE');
+        break;
+    }
     
     // Sort by delivery date (earliest first)
     return filtered.sort((a, b) => {
@@ -63,7 +94,7 @@ export default function OrdersScreen() {
       const dateB = new Date(b.fechaEntrega.seconds * 1000);
       return dateA.getTime() - dateB.getTime();
     });
-  }, [orders, searchQuery, filterStatus]);
+  }, [orders, searchQuery, filterStatus, filterOrderStatus]);
 
   const formatDeliveryDate = (timestamp: { seconds: number; nanoseconds: number }) => {
     const date = new Date(timestamp.seconds * 1000);
@@ -77,6 +108,13 @@ export default function OrdersScreen() {
   };
 
   const getStatusColor = (order: Order) => {
+    // Si el pedido tiene un estado específico, usarlo
+    if (order.estatus === 'DONE') return '#27AE60'; // Verde para entregado
+    if (order.estatus === 'CANCELED') return '#E74C3C'; // Rojo para cancelado
+    if (order.estatus === 'INCOMPLETE') return '#E67E22'; // Naranja para incompleto
+    if (order.estatus === 'BACKLOG') return '#9B59B6'; // Púrpura para por hacer
+    
+    // Si no tiene estado, usar la lógica de fecha
     const deliveryDate = new Date(order.fechaEntrega.seconds * 1000);
     const now = new Date();
     const diffHours = (deliveryDate.getTime() - now.getTime()) / (1000 * 60 * 60);
@@ -86,37 +124,175 @@ export default function OrdersScreen() {
     return '#27AE60'; // Upcoming
   };
 
-  const renderOrderItem = ({ item: order }: { item: Order }) => (
-    <TouchableOpacity
-      style={styles.orderCard}
-      onPress={() => router.push(`/orders/${order.id}`)}
-    >
-      <View style={styles.orderHeader}>
-        <Text style={styles.orderClient}>{order.cliente}</Text>
-        <View style={[styles.statusIndicator, { backgroundColor: getStatusColor(order) }]} />
-      </View>
-      
-      <View style={styles.orderDetails}>
-        <View style={styles.orderInfo}>
-          <Text style={styles.orderDate}>
-            📅 {formatDeliveryDate(order.fechaEntrega)}
-          </Text>
-          <Text style={styles.orderProducts}>
-            📦 {order.productos.length} producto{order.productos.length !== 1 ? 's' : ''}
-          </Text>
-        </View>
-        <Text style={styles.orderTotal}>
-          ${calculateTotal(order).toFixed(2)}
-        </Text>
-      </View>
-      
-      {order.lugarEntrega && (
-        <Text style={styles.orderLocation} numberOfLines={1}>
-          📍 {order.lugarEntrega}
-        </Text>
-      )}
-    </TouchableOpacity>
-  );
+  const getStatusText = (order: Order) => {
+    if (order.estatus === 'DONE') return 'Entregado';
+    if (order.estatus === 'CANCELED') return 'Cancelado';
+    if (order.estatus === 'INCOMPLETE') return 'Incompleto';
+    if (order.estatus === 'BACKLOG') return 'Por hacer';
+    return 'Pendiente';
+  };
+
+  const LoadingIcon = () => {
+    const animatedStyle = useAnimatedStyle(() => ({
+      transform: [
+        {
+          rotate: withRepeat(
+            withTiming('360deg', { duration: 1000 }),
+            -1,
+            false
+          ),
+        },
+      ],
+    }));
+
+    return (
+      <Animated.View style={animatedStyle}>
+        <Ionicons name="sync" size={16} color="#7F8C8D" style={styles.loadingIcon} />
+      </Animated.View>
+    );
+  };
+
+  const handleSwipeRight = (order: Order) => {
+    Alert.alert(
+      'Confirmar Pedido Completado',
+      `¿Estás seguro de que quieres marcar el pedido de ${order.cliente} como completado?`,
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Confirmar',
+          onPress: () => {
+            updateOrderMutation.mutate(
+              {
+                id: order.id,
+                order: { estatus: 'DONE' }
+              },
+              {
+                onSuccess: () => {
+                  Alert.alert('Éxito', 'Pedido marcado como completado');
+                },
+                onError: (error) => {
+                  Alert.alert('Error', 'No se pudo actualizar el pedido');
+                }
+              }
+            );
+          },
+        },
+      ]
+    );
+  };
+
+  const handleSwipeLeft = (order: Order) => {
+    Alert.alert(
+      'Confirmar Cancelación',
+      `¿Estás seguro de que quieres cancelar el pedido de ${order.cliente}?`,
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Confirmar',
+          onPress: () => {
+            updateOrderMutation.mutate(
+              {
+                id: order.id,
+                order: { estatus: 'CANCELED' }
+              },
+              {
+                onSuccess: () => {
+                  Alert.alert('Éxito', 'Pedido cancelado');
+                },
+                onError: (error) => {
+                  Alert.alert('Error', 'No se pudo cancelar el pedido');
+                }
+              }
+            );
+          },
+        },
+      ]
+    );
+  };
+
+  const renderOrderItem = ({ item: order }: { item: Order }) => {
+    const renderRightActions = () => (
+      <TouchableOpacity
+        style={styles.swipeRightAction}
+        onPress={() => handleSwipeRight(order)}
+      >
+        <Ionicons name="checkmark-circle" size={24} color="white" />
+        <Text style={styles.swipeActionText}>Completado</Text>
+      </TouchableOpacity>
+    );
+
+    const renderLeftActions = () => (
+      <TouchableOpacity
+        style={styles.swipeLeftAction}
+        onPress={() => handleSwipeLeft(order)}
+      >
+        <Ionicons name="close-circle" size={24} color="white" />
+        <Text style={styles.swipeActionText}>Cancelar</Text>
+      </TouchableOpacity>
+    );
+
+    const isOrderCompleted = order.estatus === 'DONE' || order.estatus === 'CANCELED';
+
+    return (
+      <Swipeable
+        renderRightActions={isOrderCompleted ? undefined : renderRightActions}
+        renderLeftActions={isOrderCompleted ? undefined : renderLeftActions}
+        rightThreshold={40}
+        leftThreshold={40}
+        enabled={!isOrderCompleted}
+      >
+        <TouchableOpacity
+          style={[
+            styles.orderCard,
+            updateOrderMutation.isPending && styles.updatingCard,
+            isOrderCompleted && styles.completedCard
+          ]}
+          onPress={() => router.push(`/orders/${order.id}`)}
+          disabled={updateOrderMutation.isPending}
+        >
+          <View style={styles.orderHeader}>
+            <Text style={styles.orderClient}>{order.cliente}</Text>
+            <View style={styles.statusContainer}>
+              <Text style={[styles.statusText, { color: getStatusColor(order) }]}>
+                {getStatusText(order)}
+              </Text>
+              <View style={[styles.statusIndicator, { backgroundColor: getStatusColor(order) }]} />
+              {updateOrderMutation.isPending && <LoadingIcon />}
+              {isOrderCompleted && (
+                <Ionicons name="lock-closed" size={14} color="#BDC3C7" style={styles.lockIcon} />
+              )}
+            </View>
+          </View>
+          
+          <View style={styles.orderDetails}>
+            <View style={styles.orderInfo}>
+              <Text style={styles.orderDate}>
+                📅 {formatDeliveryDate(order.fechaEntrega)}
+              </Text>
+              <Text style={styles.orderProducts}>
+                📦 {order.productos.length} producto{order.productos.length !== 1 ? 's' : ''}
+              </Text>
+            </View>
+            <Text style={styles.orderTotal}>
+              ${calculateTotal(order).toFixed(2)}
+            </Text>
+          </View>
+          
+          {order.lugarEntrega && (
+            <Text style={styles.orderLocation} numberOfLines={1}>
+              📍 {order.lugarEntrega}
+            </Text>
+          )}
+        </TouchableOpacity>
+      </Swipeable>
+    );
+  };
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
@@ -196,6 +372,34 @@ export default function OrdersScreen() {
         </TouchableOpacity>
       </View>
 
+      {/* Order Status Filter Tabs */}
+      <View style={styles.filterContainer}>
+        <TouchableOpacity
+          style={[styles.filterTab, filterOrderStatus === 'INCOMPLETE' && styles.activeFilterTab]}
+          onPress={() => setFilterOrderStatus('INCOMPLETE')}
+        >
+          <Text style={[styles.filterTabText, filterOrderStatus === 'INCOMPLETE' && styles.activeFilterTabText]}>
+            Incompleto
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.filterTab, filterOrderStatus === 'BACKLOG' && styles.activeFilterTab]}
+          onPress={() => setFilterOrderStatus('BACKLOG')}
+        >
+          <Text style={[styles.filterTabText, filterOrderStatus === 'BACKLOG' && styles.activeFilterTabText]}>
+            Por hacer
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.filterTab, filterOrderStatus === 'DONE' && styles.activeFilterTab]}
+          onPress={() => setFilterOrderStatus('DONE')}
+        >
+          <Text style={[styles.filterTabText, filterOrderStatus === 'DONE' && styles.activeFilterTabText]}>
+            Entregado
+          </Text>
+        </TouchableOpacity>
+      </View>
+
       {/* Orders List */}
       <FlatList
         data={filteredOrders}
@@ -204,7 +408,7 @@ export default function OrdersScreen() {
         contentContainerStyle={styles.ordersList}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={renderEmptyState}
-        refreshing={isLoading}
+        refreshing={isLoading || updateOrderMutation.isPending}
       />
     </View>
   );
@@ -243,13 +447,13 @@ const styles = StyleSheet.create({
   searchInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: '#F8F9FA',
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
   searchInput: {
-    flex: 1,
     marginLeft: 8,
     fontSize: 16,
     color: '#2C3E50',
@@ -296,6 +500,13 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
+  updatingCard: {
+    opacity: 0.6,
+  },
+  completedCard: {
+    opacity: 0.7,
+    backgroundColor: '#F8F9FA',
+  },
   orderHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -312,6 +523,21 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
+  },
+  statusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  loadingIcon: {
+    marginLeft: 8,
+  },
+  lockIcon: {
+    marginLeft: 6,
   },
   orderDetails: {
     flexDirection: 'row',
@@ -358,5 +584,29 @@ const styles = StyleSheet.create({
     color: '#BDC3C7',
     marginTop: 8,
     textAlign: 'center',
+  },
+  swipeRightAction: {
+    backgroundColor: '#27AE60',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 80,
+    height: '100%',
+    borderTopRightRadius: 12,
+    borderBottomRightRadius: 12,
+  },
+  swipeLeftAction: {
+    backgroundColor: '#E74C3C',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 80,
+    height: '100%',
+    borderTopLeftRadius: 12,
+    borderBottomLeftRadius: 12,
+  },
+  swipeActionText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 4,
   },
 });

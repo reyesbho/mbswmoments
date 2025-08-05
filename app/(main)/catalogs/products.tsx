@@ -6,14 +6,14 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    Alert,
-    FlatList,
-    Modal,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  Alert,
+  FlatList,
+  Modal,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View
 } from 'react-native';
 
 export default function ProductsScreen() {
@@ -302,7 +302,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   searchInput: {
-    flex: 1,
     marginLeft: 8,
     fontSize: 16,
     color: '#2C3E50',
