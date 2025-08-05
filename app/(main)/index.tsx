@@ -217,15 +217,29 @@ export default function OrdersScreen() {
   };
 
   const renderOrderItem = ({ item: order }: { item: Order }) => {
-    const renderRightActions = () => (
-      <TouchableOpacity
-        style={styles.swipeRightAction}
-        onPress={() => handleSwipeRight(order)}
-      >
-        <Ionicons name="checkmark-circle" size={24} color="white" />
-        <Text style={styles.swipeActionText}>Completado</Text>
-      </TouchableOpacity>
-    );
+    const renderRightActions = () => {
+      if(order.estatus === 'INCOMPLETE'){
+        return(
+          <TouchableOpacity
+            style={styles.swipeRightAction}
+            onPress={() => handleSwipeRight(order)}
+          >
+            <Ionicons name="checkmark-circle" size={24} color="white" />
+            <Text style={styles.swipeActionText}>Confirmar</Text>
+          </TouchableOpacity>)
+        }else{
+          return(
+              <TouchableOpacity
+              style={styles.swipeRightAction}
+              onPress={() => handleSwipeRight(order)}
+            >
+              <Ionicons name="checkmark-circle" size={24} color="white" />
+              <Text style={styles.swipeActionText}>Completado</Text>
+            </TouchableOpacity>  
+          )
+        }
+      }
+      
 
     const renderLeftActions = () => (
       <TouchableOpacity
@@ -493,12 +507,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     padding: 16,
     borderRadius: 12,
-    marginBottom: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
+    height: '100%',
   },
   updatingCard: {
     opacity: 0.6,
