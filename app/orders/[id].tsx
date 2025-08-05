@@ -32,6 +32,15 @@ export default function OrderDetailScreen() {
   };
 
   const getStatusColor = (order: Order) => {
+    // Si el pedido tiene un estatus específico, usarlo
+    if (order.estatus) {
+      if (order.estatus === 'DONE') return '#27AE60'; // Verde para entregado
+      if (order.estatus === 'CANCELED') return '#E74C3C'; // Rojo para cancelado
+      if (order.estatus === 'INCOMPLETE') return '#E67E22'; // Naranja para incompleto
+      if (order.estatus === 'BACKLOG') return '#9B59B6'; // Púrpura para por hacer
+    }
+    
+    // Lógica original basada en fecha
     const deliveryDate = new Date(order.fechaEntrega.seconds * 1000);
     const now = new Date();
     const diffHours = (deliveryDate.getTime() - now.getTime()) / (1000 * 60 * 60);
@@ -42,6 +51,15 @@ export default function OrderDetailScreen() {
   };
 
   const getStatusText = (order: Order) => {
+    // Si el pedido tiene un estatus específico, usarlo
+    if (order.estatus) {
+      if (order.estatus === 'DONE') return 'Entregado';
+      if (order.estatus === 'CANCELED') return 'Cancelado';
+      if (order.estatus === 'INCOMPLETE') return 'Incompleto';
+      if (order.estatus === 'BACKLOG') return 'Por hacer';
+    }
+    
+    // Lógica original basada en fecha
     const deliveryDate = new Date(order.fechaEntrega.seconds * 1000);
     const now = new Date();
     const diffHours = (deliveryDate.getTime() - now.getTime()) / (1000 * 60 * 60);
@@ -53,6 +71,31 @@ export default function OrderDetailScreen() {
 
   const handleEdit = () => {
     router.push(`/orders/${id}/edit`);
+  };
+
+  const handleConfirmOrder = () => {
+    Alert.alert(
+      'Confirmar Pedido',
+      '¿Estás seguro de que quieres confirmar este pedido? Esto cambiará el estatus a "Por hacer".',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Confirmar',
+          style: 'default',
+          onPress: async () => {
+            try {
+              await updateOrderMutation.mutateAsync({
+                id: order!.id,
+                order: { estatus: 'BACKLOG' }
+              });
+              Alert.alert('Éxito', 'Pedido confirmado correctamente');
+            } catch (error: any) {
+              Alert.alert('Error', error.message || 'Error al confirmar el pedido');
+            }
+          },
+        },
+      ]
+    );
   };
 
   const handleDelete = () => {
@@ -115,6 +158,24 @@ export default function OrderDetailScreen() {
             <Text style={styles.statusText}>{getStatusText(order)}</Text>
           </View>
           <Text style={styles.orderId}>Pedido #{order.id.slice(-8)}</Text>
+          
+          {/* Confirm Order Button - Only show if not already confirmed */}
+          {(!order.estatus || order.estatus === 'INCOMPLETE') && (
+            <TouchableOpacity 
+              style={styles.confirmButton}
+              onPress={handleConfirmOrder}
+              disabled={updateOrderMutation.isPending}
+            >
+              <Ionicons 
+                name="checkmark-circle-outline" 
+                size={20} 
+                color="white" 
+              />
+              <Text style={styles.confirmButtonText}>
+                {updateOrderMutation.isPending ? 'Confirmando...' : 'Confirmar Pedido'}
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* Customer Info */}
@@ -401,5 +462,21 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: 'white',
+  },
+  confirmButton: {
+    backgroundColor: '#4ecd7d',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginTop: 12,
+    gap: 8,
+  },
+  confirmButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
   },
 }); 
