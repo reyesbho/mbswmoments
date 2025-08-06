@@ -86,6 +86,8 @@ export default function OrdersScreen() {
       case 'DONE':
         filtered = filtered.filter(order => order.estatus === 'DONE');
         break;
+        default:
+          break;
     }
     
     // Sort by delivery date (earliest first)
@@ -502,23 +504,27 @@ const styles = StyleSheet.create({
   ordersList: {
     paddingHorizontal: 20,
     paddingTop: 16,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 10,
   },
   orderCard: {
     backgroundColor: 'white',
     padding: 16,
     borderRadius: 12,
+    marginBottom: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    height: '100%',
+    elevation: 3,
   },
   updatingCard: {
     opacity: 0.6,
   },
   completedCard: {
     opacity: 0.7,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#e4e8ed',
   },
   orderHeader: {
     flexDirection: 'row',
