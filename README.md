@@ -269,4 +269,3 @@ Para soporte técnico o preguntas:
 
 ---
 
-**Desarrollado con ❤️ para la gestión eficiente de pastelerías**
