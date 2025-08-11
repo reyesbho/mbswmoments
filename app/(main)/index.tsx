@@ -155,10 +155,11 @@ export default function OrdersScreen() {
     );
   };
 
-  const handleSwipeRight = (order: Order) => {
+  const handleSwipeRight = (order: Order, estatus: 'DONE' | 'BACKLOG') => {
+    const message = estatus === 'DONE' ? 'completado' : 'por hacer';
     Alert.alert(
-      'Confirmar Pedido Completado',
-      `¿Estás seguro de que quieres marcar el pedido de ${order.cliente} como completado?`,
+      'Confirmar Pedido a '+message,
+      `¿Estás seguro de que quieres marcar el pedido de ${order.cliente} como ${message}?`,
       [
         {
           text: 'Cancelar',
@@ -170,11 +171,11 @@ export default function OrdersScreen() {
             updateOrderMutation.mutate(
               {
                 id: order.id,
-                order: { estatus: 'DONE' }
+                order: { estatus: estatus }
               },
               {
                 onSuccess: () => {
-                  Alert.alert('Éxito', 'Pedido marcado como completado');
+                  Alert.alert('Éxito', `Pedido marcado como ${message}`);
                 },
                 onError: (error) => {
                   Alert.alert('Error', 'No se pudo actualizar el pedido');
@@ -225,7 +226,7 @@ export default function OrdersScreen() {
         return(
           <TouchableOpacity
             style={styles.swipeRightAction}
-            onPress={() => handleSwipeRight(order)}
+            onPress={() => handleSwipeRight(order, 'BACKLOG')}
           >
             <Ionicons name="checkmark-circle" size={24} color="white" />
             <Text style={styles.swipeActionText}>Confirmar</Text>
@@ -234,7 +235,7 @@ export default function OrdersScreen() {
           return(
               <TouchableOpacity
               style={styles.swipeRightAction}
-              onPress={() => handleSwipeRight(order)}
+              onPress={() => handleSwipeRight(order, 'DONE')}
             >
               <Ionicons name="checkmark-circle" size={24} color="white" />
               <Text style={styles.swipeActionText}>Completado</Text>

@@ -22,6 +22,11 @@ interface FormData {
   productos: OrderProduct[];
 }
 
+interface FormErrors {
+  cliente?: string;
+  productos?: string;
+}
+
 export default function NewOrderScreen() {
   const router = useRouter();
   const { data: products } = useProducts();
@@ -38,12 +43,21 @@ export default function NewOrderScreen() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [showProductModal, setShowProductModal] = useState(false);
+  const [errors, setErrors] = useState<FormErrors>({});
 
   const handleInputChange = (field: keyof FormData, value: string | Date) => {
     setFormData(prev => ({
       ...prev,
       [field]: value,
     }));
+    
+    // Clear error when user starts typing
+    if (errors[field as keyof FormErrors]) {
+      setErrors(prev => ({
+        ...prev,
+        [field]: undefined,
+      }));
+    }
   };
 
   const handleAddProduct = () => {
@@ -61,14 +75,23 @@ export default function NewOrderScreen() {
     }));
   };
 
-  const handleSubmit = async () => {
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+
     if (!formData.cliente.trim()) {
-      Alert.alert('Error', 'El nombre del cliente es requerido');
-      return;
+      newErrors.cliente = 'El nombre del cliente es requerido';
     }
 
     if (formData.productos.length === 0) {
-      Alert.alert('Error', 'Debe agregar al menos un producto');
+      newErrors.productos = 'Debe agregar al menos un producto';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async () => {
+    if (!validateForm()) {
       return;
     }
 
@@ -117,11 +140,17 @@ export default function NewOrderScreen() {
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Nombre del Cliente *</Text>
             <TextInput
-              style={styles.textInput}
+              style={[
+                styles.textInput,
+                errors.cliente && styles.textInputError
+              ]}
               value={formData.cliente}
               onChangeText={(value) => handleInputChange('cliente', value)}
               placeholder="Ingrese el nombre del cliente"
             />
+            {errors.cliente && (
+              <Text style={styles.errorText}>{errors.cliente}</Text>
+            )}
           </View>
           
           <View style={styles.inputContainer}>
@@ -223,6 +252,10 @@ export default function NewOrderScreen() {
               </Text>
             </View>
           )}
+          
+          {errors.productos && (
+            <Text style={styles.errorText}>{errors.productos}</Text>
+          )}
         </View>
 
         {/* Total */}
@@ -313,6 +346,21 @@ function ProductSelectionModal({
   const [precio, setPrecio] = useState('');
   const [caracteristicas, setCaracteristicas] = useState<string[]>([]);
   const [nuevaCaracteristica, setNuevaCaracteristica] = useState('');
+  const [modalErrors, setModalErrors] = useState<{
+    producto?: string;
+    size?: string;
+    cantidad?: string;
+    precio?: string;
+  }>({});
+
+  const clearModalError = (field: keyof typeof modalErrors) => {
+    if (modalErrors[field]) {
+      setModalErrors(prev => ({
+        ...prev,
+        [field]: undefined,
+      }));
+    }
+  };
 
   const handleAddCharacteristic = () => {
     if (nuevaCaracteristica.trim()) {
@@ -332,11 +380,36 @@ function ProductSelectionModal({
     setPrecio('');
     setCaracteristicas([]);
     setNuevaCaracteristica('');
+    setModalErrors({});
+  };
+
+  const validateModalForm = (): boolean => {
+    const newErrors: typeof modalErrors = {};
+
+    if (!selectedProduct) {
+      newErrors.producto = 'Seleccione un producto';
+    }
+    if (!selectedSize) {
+      newErrors.size = 'Seleccione un tamaño';
+    }
+    if (!cantidad || parseInt(cantidad) <= 0) {
+      newErrors.cantidad = 'Ingrese una cantidad válida';
+    }
+    if (!precio || parseFloat(precio) <= 0) {
+      newErrors.precio = 'Ingrese un precio válido';
+    }
+
+    setModalErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleConfirm = () => {
-    if (!selectedProduct || !selectedSize || !cantidad || !precio) {
-      Alert.alert('Error', 'Complete todos los campos requeridos');
+    if (!validateModalForm()) {
+      return;
+    }
+
+    // TypeScript guard - these are guaranteed to be non-null after validation
+    if (!selectedProduct || !selectedSize) {
       return;
     }
 
@@ -390,7 +463,10 @@ function ProductSelectionModal({
                     styles.productOption,
                     selectedProduct?.id === product.id && styles.selectedProductOption,
                   ]}
-                  onPress={() => setSelectedProduct(product)}
+                  onPress={() => {
+                    setSelectedProduct(product);
+                    clearModalError('producto');
+                  }}
                 >
                   <Text style={[
                     styles.productOptionText,
@@ -401,6 +477,9 @@ function ProductSelectionModal({
                 </TouchableOpacity>
               ))}
             </ScrollView>
+            {modalErrors.producto && (
+              <Text style={styles.errorText}>{modalErrors.producto}</Text>
+            )}
           </View>
 
           {/* Size Selection */}
@@ -414,7 +493,10 @@ function ProductSelectionModal({
                     styles.sizeOption,
                     selectedSize?.id === size.id && styles.selectedSizeOption,
                   ]}
-                  onPress={() => setSelectedSize(size)}
+                  onPress={() => {
+                    setSelectedSize(size);
+                    clearModalError('size');
+                  }}
                 >
                   <Text style={[
                     styles.sizeOptionText,
@@ -425,6 +507,9 @@ function ProductSelectionModal({
                 </TouchableOpacity>
               ))}
             </ScrollView>
+            {modalErrors.size && (
+              <Text style={styles.errorText}>{modalErrors.size}</Text>
+            )}
           </View>
 
           {/* Quantity and Price */}
@@ -433,22 +518,40 @@ function ProductSelectionModal({
               <View style={styles.halfInput}>
                 <Text style={styles.modalSectionTitle}>Cantidad *</Text>
                 <TextInput
-                  style={styles.modalTextInput}
+                  style={[
+                    styles.modalTextInput,
+                    modalErrors.cantidad && styles.textInputError
+                  ]}
                   value={cantidad}
-                  onChangeText={setCantidad}
+                  onChangeText={(value) => {
+                    setCantidad(value);
+                    clearModalError('cantidad');
+                  }}
                   keyboardType="numeric"
                   placeholder="1"
                 />
+                {modalErrors.cantidad && (
+                  <Text style={styles.errorText}>{modalErrors.cantidad}</Text>
+                )}
               </View>
               <View style={styles.halfInput}>
                 <Text style={styles.modalSectionTitle}>Precio *</Text>
                 <TextInput
-                  style={styles.modalTextInput}
+                  style={[
+                    styles.modalTextInput,
+                    modalErrors.precio && styles.textInputError
+                  ]}
                   value={precio}
-                  onChangeText={setPrecio}
+                  onChangeText={(value) => {
+                    setPrecio(value);
+                    clearModalError('precio');
+                  }}
                   keyboardType="numeric"
                   placeholder="0.00"
                 />
+                {modalErrors.precio && (
+                  <Text style={styles.errorText}>{modalErrors.precio}</Text>
+                )}
               </View>
             </View>
           </View>
@@ -555,6 +658,15 @@ const styles = StyleSheet.create({
     color: '#2C3E50',
     borderWidth: 1,
     borderColor: '#E9ECEF',
+  },
+  textInputError: {
+    borderColor: '#E74C3C',
+  },
+  errorText: {
+    fontSize: 12,
+    color: '#E74C3C',
+    marginTop: 4,
+    marginLeft: 4,
   },
   dateTimeContainer: {
     flexDirection: 'row',
