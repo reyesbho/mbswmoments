@@ -22,8 +22,9 @@ export default function OrdersScreen() {
   const { data: orders, isLoading } = useOrders();
   const updateOrderMutation = useUpdateOrder();
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterStatus, setFilterStatus] = useState<'all' | 'today' | 'upcoming'>('all');
+  const [filterStatus, setFilterStatus] = useState<'all' | 'today' | 'upcoming'>('today');
   const [filterOrderStatus, setFilterOrderStatus] = useState<'INCOMPLETE' | 'BACKLOG' | 'DONE'>('BACKLOG');
+  const [showFilters, setShowFilters] = useState(false);
 
   // Suppress deprecation warning for Swipeable
   React.useEffect(() => {
@@ -333,88 +334,101 @@ export default function OrdersScreen() {
       {/* Header */}
       <HeaderView 
         title="Pedidos" >
-      </HeaderView>
-
-      {/* Search and Filters */}
-      <View style={styles.searchContainer}>
-        <View style={styles.searchInputContainer}>
-          <Ionicons name="search" size={20} color="#7F8C8D" />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Buscar por cliente o dirección..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-          {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={() => setSearchQuery('')}>
-              <Ionicons name="close-circle" size={20} color="#7F8C8D" />
-            </TouchableOpacity>
-          )}
-        </View>
-        
+          
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => router.push('/orders/new')}
         >
           <Ionicons name="add" size={24} color="white" />
         </TouchableOpacity>
-      </View>
+      </HeaderView>
 
-      {/* Filter Tabs */}
-      <View style={styles.filterContainer}>
+      {/* Filter Button */}
+      <View style={styles.filterButtonContainer}>
         <TouchableOpacity
-          style={[styles.filterTab, filterStatus === 'all' && styles.activeFilterTab]}
-          onPress={() => setFilterStatus('all')}
+          style={styles.filterButton}
+          onPress={() => setShowFilters(!showFilters)}
         >
-          <Text style={[styles.filterTabText, filterStatus === 'all' && styles.activeFilterTabText]}>
-            Todos
+          <Ionicons 
+            name={showFilters ? "chevron-up" : "chevron-down"} 
+            size={20} 
+            color="#4ECDC4" 
+          />
+          <Text style={styles.filterButtonText}>
+            Filtros {showFilters ? '(Ocultar)' : '(Mostrar)'}
           </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.filterTab, filterStatus === 'today' && styles.activeFilterTab]}
-          onPress={() => setFilterStatus('today')}
-        >
-          <Text style={[styles.filterTabText, filterStatus === 'today' && styles.activeFilterTabText]}>
-            Hoy
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.filterTab, filterStatus === 'upcoming' && styles.activeFilterTab]}
-          onPress={() => setFilterStatus('upcoming')}
-        >
-          <Text style={[styles.filterTabText, filterStatus === 'upcoming' && styles.activeFilterTabText]}>
-            Próximos
-          </Text>
+          <View style={styles.activeFiltersIndicator}>
+            <Text style={styles.activeFiltersCount}>
+              {filterStatus !== 'all' || filterOrderStatus !== 'BACKLOG' ? '2' : '0'}
+            </Text>
+          </View>
         </TouchableOpacity>
       </View>
 
-      {/* Order Status Filter Tabs */}
-      <View style={styles.filterContainer}>
-        <TouchableOpacity
-          style={[styles.filterTab, filterOrderStatus === 'INCOMPLETE' && styles.activeFilterTab]}
-          onPress={() => setFilterOrderStatus('INCOMPLETE')}
-        >
-          <Text style={[styles.filterTabText, filterOrderStatus === 'INCOMPLETE' && styles.activeFilterTabText]}>
-            Incompleto
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.filterTab, filterOrderStatus === 'BACKLOG' && styles.activeFilterTab]}
-          onPress={() => setFilterOrderStatus('BACKLOG')}
-        >
-          <Text style={[styles.filterTabText, filterOrderStatus === 'BACKLOG' && styles.activeFilterTabText]}>
-            Por hacer
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.filterTab, filterOrderStatus === 'DONE' && styles.activeFilterTab]}
-          onPress={() => setFilterOrderStatus('DONE')}
-        >
-          <Text style={[styles.filterTabText, filterOrderStatus === 'DONE' && styles.activeFilterTabText]}>
-            Entregado
-          </Text>
-        </TouchableOpacity>
-      </View>
+      {/* Collapsible Filter Section */}
+      {showFilters && (
+        <View style={styles.collapsibleFilterContainer}>
+          <View style={styles.filterSection}>
+            <Text style={styles.filterSectionTitle}>Fecha de entrega</Text>
+            <View style={styles.filterChipsContainer}>
+              <TouchableOpacity
+                style={[styles.filterChip, filterStatus === 'all' && styles.activeFilterChip]}
+                onPress={() => setFilterStatus('all')}
+              >
+                <Text style={[styles.filterChipText, filterStatus === 'all' && styles.activeFilterChipText]}>
+                  Todos
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.filterChip, filterStatus === 'today' && styles.activeFilterChip]}
+                onPress={() => setFilterStatus('today')}
+              >
+                <Text style={[styles.filterChipText, filterStatus === 'today' && styles.activeFilterChipText]}>
+                  Hoy
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.filterChip, filterStatus === 'upcoming' && styles.activeFilterChip]}
+                onPress={() => setFilterStatus('upcoming')}
+              >
+                <Text style={[styles.filterChipText, filterStatus === 'upcoming' && styles.activeFilterChipText]}>
+                  Próximos
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View style={styles.filterSection}>
+            <Text style={styles.filterSectionTitle}>Estado del pedido</Text>
+            <View style={styles.filterChipsContainer}>
+              <TouchableOpacity
+                style={[styles.filterChip, filterOrderStatus === 'INCOMPLETE' && styles.activeFilterChip]}
+                onPress={() => setFilterOrderStatus('INCOMPLETE')}
+              >
+                <Text style={[styles.filterChipText, filterOrderStatus === 'INCOMPLETE' && styles.activeFilterChipText]}>
+                  Incompleto
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.filterChip, filterOrderStatus === 'BACKLOG' && styles.activeFilterChip]}
+                onPress={() => setFilterOrderStatus('BACKLOG')}
+              >
+                <Text style={[styles.filterChipText, filterOrderStatus === 'BACKLOG' && styles.activeFilterChipText]}>
+                  Por hacer
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.filterChip, filterOrderStatus === 'DONE' && styles.activeFilterChip]}
+                onPress={() => setFilterOrderStatus('DONE')}
+              >
+                <Text style={[styles.filterChipText, filterOrderStatus === 'DONE' && styles.activeFilterChipText]}>
+                  Entregado
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      )}
 
       {/* Orders List */}
       <FlatList
@@ -474,32 +488,85 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#2C3E50',
   },
-  filterContainer: {
-    flexDirection: 'row',
+  filterButtonContainer: {
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingVertical: 12,
     backgroundColor: 'white',
     borderBottomWidth: 1,
     borderBottomColor: '#E9ECEF',
   },
-  filterTab: {
-    flex: 1,
-    paddingVertical: 8,
+  filterButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
     paddingHorizontal: 16,
-    marginHorizontal: 4,
-    borderRadius: 20,
+    backgroundColor: '#F8F9FA',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E9ECEF',
+  },
+  filterButtonText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#2C3E50',
+    flex: 1,
+    marginLeft: 8,
+  },
+  activeFiltersIndicator: {
+    backgroundColor: '#4ECDC4',
+    borderRadius: 12,
+    minWidth: 24,
+    height: 24,
+    justifyContent: 'center',
     alignItems: 'center',
   },
-  activeFilterTab: {
-    backgroundColor: '#4ECDC4',
+  activeFiltersCount: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: 'white',
   },
-  filterTabText: {
+  collapsibleFilterContainer: {
+    backgroundColor: 'white',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E9ECEF',
+  },
+  filterSection: {
+    marginBottom: 16,
+  },
+  filterSectionTitle: {
     fontSize: 14,
+    fontWeight: '600',
+    color: '#2C3E50',
+    marginBottom: 8,
+  },
+  filterChipsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  filterChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#F8F9FA',
+    borderWidth: 1,
+    borderColor: '#E9ECEF',
+  },
+  activeFilterChip: {
+    backgroundColor: '#4ECDC4',
+    borderColor: '#4ECDC4',
+  },
+  filterChipText: {
+    fontSize: 13,
     fontWeight: '500',
     color: '#7F8C8D',
   },
-  activeFilterTabText: {
+  activeFilterChipText: {
     color: 'white',
+    fontWeight: '600',
   },
   ordersList: {
     paddingHorizontal: 20,

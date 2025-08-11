@@ -7,13 +7,7 @@ export function HeaderView({title, children, hasBackButton=false }: {title: stri
 
     return (
         <View style={styles.header}>
-          {hasBackButton && (
-                <TouchableOpacity onPress={() => router.back()}>
-                    <Ionicons name="arrow-back" size={24} color="#2C3E50" />
-                </TouchableOpacity>
-            )}
             <Text style={styles.headerTitle}>{title}</Text>
-            
             {children && children}
       </View>   
     )
@@ -22,11 +16,13 @@ export function HeaderView({title, children, hasBackButton=false }: {title: stri
 const styles = StyleSheet.create({
     header: {
       flexDirection: 'row',
-      justifyContent: 'flex-start',
+      justifyContent: 'space-between',
       alignItems: 'center',
       paddingHorizontal: 10,
       paddingTop: 10,
-      paddingBottom: 10,
+      paddingBottom: 5,
+      paddingLeft: 30,
+      paddingRight: 20,
       backgroundColor: 'white',
       gap: 20,
     },
