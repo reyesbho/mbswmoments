@@ -222,6 +222,10 @@ class ApiService {
     return this.patch<SizeProduct>(`/api/sizes/${id}`, { estatus });
   }
 
+  async deleteSize(id: string): Promise<{ message: string }> {
+    return this.delete<{ message: string }>(`/api/sizes/${id}`);
+  }
+
   // Order methods
   async getOrders(): Promise<Order[]> {
     const response = await this.get<PaginatedOrdersResponse>('/api/pedidos?estatus=ALL&pageSize=100');

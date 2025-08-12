@@ -162,6 +162,17 @@ export const useUpdateSizeStatus = () => {
   });
 };
 
+export const useDeleteSize = () => {
+  return useMutation({
+    mutationFn: async (id: string) => {
+      return apiService.deleteSize(id);
+    },
+    retry: false,
+    onError: (error) => {
+    },
+  });
+};
+
 // Order hooks
 export const useOrders = () => {
   return useQuery({

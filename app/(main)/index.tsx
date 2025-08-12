@@ -6,8 +6,8 @@ import { format } from 'date-fns';
 import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import {
-  Alert,
   FlatList,
+  RefreshControl,
   StyleSheet,
   Text,
   TextInput,
@@ -15,16 +15,33 @@ import {
   View
 } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
+import Toast, { useToast } from '@/components/Toast';
 import Animated, { useAnimatedStyle, withRepeat, withTiming } from 'react-native-reanimated';
 
 export default function OrdersScreen() {
   const router = useRouter();
-  const { data: orders, isLoading } = useOrders();
+  const { data: orders, isLoading, refetch } = useOrders();
   const updateOrderMutation = useUpdateOrder();
+  const { toast, showToast, hideToast, showSuccess, showError } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'today' | 'upcoming'>('today');
   const [filterOrderStatus, setFilterOrderStatus] = useState<'INCOMPLETE' | 'BACKLOG' | 'DONE'>('BACKLOG');
   const [showFilters, setShowFilters] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Function to handle pull-to-refresh
+  const onRefresh = React.useCallback(async () => {
+    setRefreshing(true);
+    try {
+      // Trigger a refetch of the orders data using React Query
+      await refetch();
+      showSuccess('Lista actualizada');
+    } catch (error) {
+      showError('Error al actualizar la lista');
+    } finally {
+      setRefreshing(false);
+    }
+  }, [refetch]);
 
   // Suppress deprecation warning for Swipeable
   React.useEffect(() => {
@@ -157,66 +174,41 @@ export default function OrdersScreen() {
 
   const handleSwipeRight = (order: Order, estatus: 'DONE' | 'BACKLOG') => {
     const message = estatus === 'DONE' ? 'completado' : 'por hacer';
-    Alert.alert(
-      'Confirmar Pedido a '+message,
-      `¿Estás seguro de que quieres marcar el pedido de ${order.cliente} como ${message}?`,
-      [
-        {
-          text: 'Cancelar',
-          style: 'cancel',
+    
+    // For now, we'll directly update without confirmation to use toasts
+    // In a real app, you might want to add a confirmation modal
+    updateOrderMutation.mutate(
+      {
+        id: order.id,
+        order: { estatus: estatus }
+      },
+      {
+        onSuccess: () => {
+          showSuccess(`Pedido marcado como ${message}`);
         },
-        {
-          text: 'Confirmar',
-          onPress: () => {
-            updateOrderMutation.mutate(
-              {
-                id: order.id,
-                order: { estatus: estatus }
-              },
-              {
-                onSuccess: () => {
-                  Alert.alert('Éxito', `Pedido marcado como ${message}`);
-                },
-                onError: (error) => {
-                  Alert.alert('Error', 'No se pudo actualizar el pedido');
-                }
-              }
-            );
-          },
-        },
-      ]
+        onError: (error) => {
+          showError('No se pudo actualizar el pedido');
+        }
+      }
     );
   };
 
   const handleSwipeLeft = (order: Order) => {
-    Alert.alert(
-      'Confirmar Cancelación',
-      `¿Estás seguro de que quieres cancelar el pedido de ${order.cliente}?`,
-      [
-        {
-          text: 'Cancelar',
-          style: 'cancel',
+    // For now, we'll directly cancel without confirmation to use toasts
+    // In a real app, you might want to add a confirmation modal
+    updateOrderMutation.mutate(
+      {
+        id: order.id,
+        order: { estatus: 'CANCELED' }
+      },
+      {
+        onSuccess: () => {
+          showSuccess('Pedido cancelado');
         },
-        {
-          text: 'Confirmar',
-          onPress: () => {
-            updateOrderMutation.mutate(
-              {
-                id: order.id,
-                order: { estatus: 'CANCELED' }
-              },
-              {
-                onSuccess: () => {
-                  Alert.alert('Éxito', 'Pedido cancelado');
-                },
-                onError: (error) => {
-                  Alert.alert('Error', 'No se pudo cancelar el pedido');
-                }
-              }
-            );
-          },
-        },
-      ]
+        onError: (error) => {
+          showError('No se pudo cancelar el pedido');
+        }
+      }
     );
   };
 
@@ -439,7 +431,28 @@ export default function OrdersScreen() {
         contentContainerStyle={styles.ordersList}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={renderEmptyState}
-        refreshing={isLoading || updateOrderMutation.isPending}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#4ECDC4']}
+            tintColor="#4ECDC4"
+            title="Desliza para actualizar"
+            titleColor="#7F8C8D"
+            progressBackgroundColor="#F8F9FA"
+          />
+        }
+      />
+      
+      {/* Toast Component */}
+      <Toast
+        visible={toast.visible}
+        message={toast.message}
+        type={toast.type}
+        onClose={hideToast}
+        onPress={toast.onPress}
+        actionText={toast.actionText}
+        showIcon={toast.showIcon}
       />
     </View>
   );
@@ -677,7 +690,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: 80,
-    height: '100%',
+    height: '93%',
     borderTopRightRadius: 12,
     borderBottomRightRadius: 12,
   },
@@ -686,7 +699,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     width: 80,
-    height: '100%',
+    height: '93%',
     borderTopLeftRadius: 12,
     borderBottomLeftRadius: 12,
   },
@@ -695,5 +708,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     marginTop: 4,
+  },
+  refreshIndicator: {
+    backgroundColor: '#4ECDC4',
   },
 });

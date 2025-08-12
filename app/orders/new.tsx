@@ -5,7 +5,6 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  Alert,
   Modal,
   ScrollView,
   StyleSheet,
@@ -14,6 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import Toast, { useToast } from '@/components/Toast';
 
 interface FormData {
   cliente: string;
@@ -32,6 +32,7 @@ export default function NewOrderScreen() {
   const { data: products } = useProducts();
   const { data: sizes } = useSizes();
   const createOrderMutation = useCreateOrder();
+  const { toast, showToast, hideToast, showSuccess, showError } = useToast();
   
   const [formData, setFormData] = useState<FormData>({
     cliente: '',
@@ -62,7 +63,7 @@ export default function NewOrderScreen() {
 
   const handleAddProduct = () => {
     if (!products || products.length === 0) {
-      Alert.alert('Error', 'No hay productos disponibles');
+      showError('No hay productos disponibles');
       return;
     }
     setShowProductModal(true);
@@ -106,11 +107,14 @@ export default function NewOrderScreen() {
       };
 
       await createOrderMutation.mutateAsync(orderData);
-      Alert.alert('Éxito', 'Pedido creado correctamente', [
-        { text: 'OK', onPress: () => router.back() },
-      ]);
+      showSuccess('Pedido creado correctamente');
+      
+      // Redirigir automáticamente a la vista de pedidos después de un breve delay
+      setTimeout(() => {
+        router.back();
+      }, 1500);
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Error al crear el pedido');
+      showError(error.message || 'Error al crear el pedido');
     }
   };
 
@@ -319,11 +323,22 @@ export default function NewOrderScreen() {
             productos: [...prev.productos, producto],
           }));
           setShowProductModal(false);
-        }}
-      />
-    </View>
-  );
-}
+                 }}
+       />
+       
+               {/* Toast Component */}
+        <Toast
+          visible={toast.visible}
+          message={toast.message}
+          type={toast.type}
+          onClose={hideToast}
+          onPress={toast.onPress}
+          actionText={toast.actionText}
+          showIcon={toast.showIcon}
+        />
+     </View>
+   );
+ }
 
 interface ProductSelectionModalProps {
   visible: boolean;
@@ -352,6 +367,7 @@ function ProductSelectionModal({
     cantidad?: string;
     precio?: string;
   }>({});
+  const { toast, showToast, hideToast, showError } = useToast();
 
   const clearModalError = (field: keyof typeof modalErrors) => {
     if (modalErrors[field]) {
@@ -589,11 +605,22 @@ function ProductSelectionModal({
            <TouchableOpacity onPress={handleConfirm} style={styles.confirmButton}>
              <Text style={styles.confirmButtonText}>Agregar</Text>
            </TouchableOpacity>
-         </View>
-      </View>
-    </Modal>
-  );
-}
+                   </View>
+        </View>
+        
+        {/* Toast Component for Modal */}
+        <Toast
+          visible={toast.visible}
+          message={toast.message}
+          type={toast.type}
+          onClose={hideToast}
+          onPress={toast.onPress}
+          actionText={toast.actionText}
+          showIcon={toast.showIcon}
+        />
+      </Modal>
+    );
+  }
 
 const styles = StyleSheet.create({
   container: {
