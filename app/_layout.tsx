@@ -1,3 +1,4 @@
+import EnvironmentInfo from '@/components/EnvironmentInfo';
 import { NOTIFICATION_TYPES } from '@/constants/Notifications';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
@@ -66,11 +67,14 @@ function AppContent() {
   }, [isAuthenticated]);
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(main)" />
-        <Stack.Screen name="auth" />
-        <Stack.Screen name="notifications" />
-    </Stack>
+    <>
+      <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(main)" />
+          <Stack.Screen name="auth" />
+          <Stack.Screen name="notifications" />
+      </Stack>
+      <EnvironmentInfo />
+    </>
   );
 }
 

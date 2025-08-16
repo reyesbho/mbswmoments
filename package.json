@@ -4,10 +4,23 @@
   "version": "1.0.0",
   "scripts": {
     "start": "expo start",
+    "start:dev": "expo start",
+    "start:prod": "expo start --no-dev --minify",
     "reset-project": "node ./scripts/reset-project.js",
+    "set-env:dev": "node ./scripts/set-env.js development",
+    "set-env:prod": "node ./scripts/set-env.js production",
     "android": "expo start --android",
+    "android:dev": "expo start --android",
+    "android:prod": "expo start --android --no-dev --minify",
     "ios": "expo start --ios",
+    "ios:dev": "expo start --ios",
+    "ios:prod": "expo start --ios --no-dev --minify",
     "web": "expo start --web",
+    "web:dev": "expo start --web",
+    "web:prod": "expo start --web --no-dev --minify",
+    "build:android": "expo run:android --no-dev --minify",
+    "build:ios": "expo run:ios --no-dev --minify",
+    "build:web": "expo export:web --no-dev --minify",
     "lint": "expo lint"
   },
   "dependencies": {

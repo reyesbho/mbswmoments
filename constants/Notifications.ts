@@ -1,12 +1,14 @@
+import { APP_CONFIG } from '@/constants/Config';
+
 // Configuraciones para notificaciones
 export const NOTIFICATION_CONFIG = {
   // Configuración por defecto
-  DEFAULT_TIME: "08:00",
-  DEFAULT_DAYS: [1, 2, 3, 4, 5, 6, 0], // Lunes a domingo
+  DEFAULT_TIME: APP_CONFIG.notifications.defaultTime,
+  DEFAULT_DAYS: APP_CONFIG.notifications.defaultDays,
   
   // Límites de tiempo para pedidos urgentes (en horas)
-  URGENT_THRESHOLD: 2, // Pedidos en las próximas 2 horas
-  URGENT_REMINDER: 1,  // Recordatorio 1 hora antes
+  URGENT_THRESHOLD: APP_CONFIG.notifications.urgentThreshold,
+  URGENT_REMINDER: APP_CONFIG.notifications.urgentReminder,
   
   // Límites para mostrar pedidos urgentes en el widget
   WIDGET_URGENT_THRESHOLD: 4, // Mostrar como urgente si es en las próximas 4 horas

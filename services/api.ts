@@ -1,18 +1,19 @@
+import { APP_CONFIG, getCurrentConfig } from '@/constants/Config';
 import { ApiError, AuthResponse, Order, PaginatedOrdersResponse, Product, RegisterResponse, SizeProduct } from '@/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
 
 class ApiService {
   private api: AxiosInstance;
-  private baseURL = 'http://192.168.3.19:3000';
+  private baseURL = APP_CONFIG.api.baseURL;
   private onUnauthorized?: () => void;
-  private tokenKey = 'auth_token'; // Para localStorage
+  private tokenKey = APP_CONFIG.storage.tokenKey;
 
   constructor() {
     
     this.api = axios.create({
       baseURL: this.baseURL,
-      timeout: 10000,
+      timeout: APP_CONFIG.api.timeout,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -22,6 +23,11 @@ class ApiService {
     // Request interceptor
     this.api.interceptors.request.use(
       async (config) => {
+        // Log request in development
+        if (getCurrentConfig().LOG_REQUESTS) {
+          console.log(`🌐 API Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
+        }
+
         if (config.url?.includes('/user/login') || config.url?.includes('/user/register')) {
           return config;
         }
@@ -41,6 +47,11 @@ class ApiService {
     // Response interceptor
     this.api.interceptors.response.use(
       async (response: AxiosResponse) => {
+        // Log response in development
+        if (getCurrentConfig().LOG_RESPONSES) {
+          console.log(`✅ API Response: ${response.status} ${response.config.url}`);
+        }
+
         // Store token if provided in response
         if (response.data && response.data.token) {
           await this.setTokenInStorage(response.data.token);
