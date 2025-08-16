@@ -1,4 +1,5 @@
 import { HeaderView } from '@/components/HeaderView';
+import Toast, { useToast } from '@/components/Toast';
 import { useOrders, useUpdateOrder } from '@/hooks/useApi';
 import { Order } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,12 +11,10 @@ import {
   RefreshControl,
   StyleSheet,
   Text,
-  TextInput,
   TouchableOpacity,
   View
 } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
-import Toast, { useToast } from '@/components/Toast';
 import Animated, { useAnimatedStyle, withRepeat, withTiming } from 'react-native-reanimated';
 
 export default function OrdersScreen() {
@@ -327,13 +326,20 @@ export default function OrdersScreen() {
       {/* Header */}
       <HeaderView 
         title="Pedidos" >
-          
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => router.push('/orders/new')}
-        >
-          <Ionicons name="add" size={24} color="white" />
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          <TouchableOpacity
+            style={styles.notificationButton}
+            onPress={() => router.push('/notifications')}
+          >
+            <Ionicons name="notifications-outline" size={24} color="#4ECDC4" />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => router.push('/orders/new')}
+          >
+            <Ionicons name="add" size={24} color="white" />
+          </TouchableOpacity>
+        </View>
       </HeaderView>
 
       {/* Filter Button */}
@@ -470,6 +476,21 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#F8F9FA',
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  notificationButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F8F9FA',
+    borderWidth: 1,
+    borderColor: '#E9ECEF',
   },
   addButton: {
     backgroundColor: '#4ECDC4',
