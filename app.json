@@ -1,21 +1,21 @@
 {
   "expo": {
-    "name": "mbswmoments",
+    "name": "SMoments",
     "slug": "mbswmoments",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/sweet-moments.png",
     "scheme": "mbswmoments",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
     },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
+          "android": {
+        "adaptiveIcon": {
+          "foregroundImage": "./assets/images/sweet-moments.png",
+          "backgroundColor": "#ffffff"
+        },
       "edgeToEdgeEnabled": true
     },
     "web": {

@@ -2,11 +2,11 @@ import { ConfigContext, ExpoConfig } from 'expo/config';
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: 'mbswmoments',
+  name: 'SMoments',
   slug: 'mbswmoments',
   version: '1.0.0',
   orientation: 'portrait',
-  icon: './assets/images/icon.png',
+  icon: './assets/images/sweet-moments.png',
   scheme: 'mbswmoments',
   userInterfaceStyle: 'automatic',
   newArchEnabled: true,
@@ -19,7 +19,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   
   android: {
     adaptiveIcon: {
-      foregroundImage: './assets/images/adaptive-icon.png',
+      foregroundImage: './assets/images/sweet-moments.png',
       backgroundColor: '#ffffff',
     },
     edgeToEdgeEnabled: true,
@@ -62,5 +62,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       (process.env.NODE_ENV === 'production' 
         ? 'https://services.sweetmoments.mx' 
         : 'http://192.168.3.19:3000'),
+    
+    // EAS Project ID
+    eas: {
+      projectId: '21d40380-ad65-474f-aed4-acb2867529fa',
+    },
   },
 });
