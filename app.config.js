@@ -1,10 +1,13 @@
 import { ConfigContext, ExpoConfig } from 'expo/config';
 
+// Importar configuración centralizada
+const envConfig = require('./config/env');
+
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
-  name: 'SMoments',
+  name: envConfig.APP_NAME,
   slug: 'mbswmoments',
-  version: '1.0.0',
+  version: envConfig.VERSION,
   orientation: 'portrait',
   icon: './assets/images/sweet-moments.png',
   scheme: 'mbswmoments',
@@ -53,15 +56,29 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   
   // Variables de entorno
   extra: {
-    // Determinar el entorno basado en NODE_ENV o __DEV__
-    isDevelopment: process.env.NODE_ENV === 'development' || process.env.EXPO_PUBLIC_ENV === 'development',
-    isProduction: process.env.NODE_ENV === 'production' || process.env.EXPO_PUBLIC_ENV === 'production',
+    // Entorno
+    isDevelopment: envConfig.IS_DEVELOPMENT,
+    isPreview: envConfig.IS_PREVIEW,
+    isProduction: envConfig.IS_PRODUCTION,
     
-    // URLs de la API
-    apiUrl: process.env.EXPO_PUBLIC_API_URL || 
-      (process.env.NODE_ENV === 'production' 
-        ? 'https://services.sweetmoments.mx' 
-        : 'http://192.168.3.19:3000'),
+    // API
+    apiUrl: envConfig.API_URL,
+    apiTimeout: envConfig.API_TIMEOUT,
+    apiRetryAttempts: envConfig.API_RETRY_ATTEMPTS,
+    apiRetryDelay: envConfig.API_RETRY_DELAY,
+    
+    // App
+    appName: envConfig.APP_NAME,
+    version: envConfig.VERSION,
+    
+    // Logging
+    logRequests: envConfig.LOG_REQUESTS,
+    logResponses: envConfig.LOG_RESPONSES,
+    
+    // Notifications
+    notificationDefaultTime: envConfig.NOTIFICATION_DEFAULT_TIME,
+    notificationUrgentThreshold: envConfig.NOTIFICATION_URGENT_THRESHOLD,
+    notificationUrgentReminder: envConfig.NOTIFICATION_URGENT_REMINDER,
     
     // EAS Project ID
     eas: {

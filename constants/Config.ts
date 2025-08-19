@@ -1,17 +1,30 @@
 
-// Configuración de entorno
+import Constants from 'expo-constants';
+
+// Obtener configuración desde Expo Constants
+const extra = Constants.expoConfig?.extra || {};
+
+// Configuración de entorno desde la configuración centralizada
 export const ENV = {
-  // Determinar el entorno actual usando Expo Constants o __DEV__
-  isDevelopment: __DEV__,
-  isProduction: !__DEV__,
+  // Entorno actual
+  isDevelopment: extra.isDevelopment || __DEV__,
+  isPreview: extra.isPreview || false,
+  isProduction: extra.isProduction || !__DEV__,
   
-  // URLs de la API según el entorno
-  API_URL: __DEV__ ? 'http://192.168.3.19:3000' : 'https://services.sweetmoments.mx',
-    
-  // Configuraciones adicionales por entorno
+  // URLs de la API
+  API_URL: extra.apiUrl || (__DEV__ ? 'http://localhost:3000' : 'https://services.sweetmoments.mx'),
+  
+  // Configuraciones por entorno
   DEVELOPMENT: {
-    API_URL: 'http://192.168.3.19:3000',
+    API_URL: 'http://localhost:3000',
     TIMEOUT: 10000,
+    LOG_REQUESTS: true,
+    LOG_RESPONSES: true,
+  },
+  
+  PREVIEW: {
+    API_URL: 'https://services.sweetmoments.mx',
+    TIMEOUT: 15000,
     LOG_REQUESTS: true,
     LOG_RESPONSES: true,
   },
@@ -26,29 +39,31 @@ export const ENV = {
 
 // Obtener configuración actual según el entorno
 export const getCurrentConfig = () => {
-  return ENV.isDevelopment ? ENV.DEVELOPMENT : ENV.PRODUCTION;
+  if (ENV.isDevelopment) return ENV.DEVELOPMENT;
+  if (ENV.isPreview) return ENV.PREVIEW;
+  return ENV.PRODUCTION;
 };
 
 // Configuración de la aplicación
 export const APP_CONFIG = {
-  name: 'mbswmoments',
-  version: '1.0.0',
+  name: extra.appName || 'SMoments',
+  version: extra.version || '1.0.0',
   description: 'Sweet Moments - Gestión de Pedidos',
   
   // Configuración de notificaciones
   notifications: {
-    defaultTime: '08:00',
+    defaultTime: extra.notificationDefaultTime || '08:00',
     defaultDays: [1, 2, 3, 4, 5, 6, 0], // Lunes a domingo
-    urgentThreshold: 2, // horas
-    urgentReminder: 1, // hora antes
+    urgentThreshold: extra.notificationUrgentThreshold || 2, // horas
+    urgentReminder: extra.notificationUrgentReminder || 1, // hora antes
   },
   
   // Configuración de la API
   api: {
     baseURL: ENV.API_URL,
-    timeout: getCurrentConfig().TIMEOUT,
-    retryAttempts: 3,
-    retryDelay: 1000,
+    timeout: extra.apiTimeout || getCurrentConfig().TIMEOUT,
+    retryAttempts: extra.apiRetryAttempts || 3,
+    retryDelay: extra.apiRetryDelay || 1000,
   },
   
   // Configuración de almacenamiento

@@ -3,7 +3,7 @@ const path = require('path');
 
 const envType = process.argv[2];
 
-if (!envType || !['development', 'production'].includes(envType)) {
+if (!envType || !['development', 'production','preview'].includes(envType)) {
   console.log('❌ Uso: node scripts/set-env.js [development|production]');
   console.log('Ejemplo: node scripts/set-env.js development');
   process.exit(1);
@@ -11,6 +11,7 @@ if (!envType || !['development', 'production'].includes(envType)) {
 
 const envFiles = {
   development: 'env.development',
+  preview: 'env.preview',
   production: 'env.production'
 };
 

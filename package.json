@@ -8,6 +8,7 @@
     "start:prod": "expo start --no-dev --minify",
     "reset-project": "node ./scripts/reset-project.js",
     "set-env:dev": "node ./scripts/set-env.js development",
+    "set-env:preview": "node ./scripts/set-env.js preview",
     "set-env:prod": "node ./scripts/set-env.js production",
     "android": "expo start --android",
     "android:dev": "expo start --android",
@@ -21,6 +22,9 @@
     "build:android": "expo run:android --no-dev --minify",
     "build:ios": "expo run:ios --no-dev --minify",
     "build:web": "expo export:web --no-dev --minify",
+    "build:preview": "node scripts/prepare-build.js preview && npx eas build --platform android --profile preview",
+    "build:production": "node scripts/prepare-build.js production && npx eas build --platform android --profile production",
+    "check-env": "node scripts/check-env.js",
     "lint": "expo lint"
   },
   "dependencies": {

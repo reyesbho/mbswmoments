@@ -1,180 +1,141 @@
-# Configuración de Entornos - mbswmoments
+# Configuración de Entornos - SMoments
 
-Este documento describe cómo configurar y usar diferentes entornos (desarrollo y producción) en la aplicación mbswmoments.
+Esta documentación explica cómo configurar y usar los diferentes entornos de la aplicación SMoments.
 
-## 🏗️ Estructura de Configuración
+## 📁 Archivos de Configuración
 
-### Archivos de Configuración
+### Archivos de Entorno
+- `env.development` - Configuración para desarrollo local
+- `env.preview` - Configuración para pruebas (preview)
+- `env.production` - Configuración para producción
+- `.env` - Archivo activo (se genera automáticamente)
 
-- `constants/Config.ts` - Configuración centralizada de la aplicación
-- `app.config.js` - Configuración de Expo con variables de entorno
-- `env.development` - Variables de entorno para desarrollo
-- `env.production` - Variables de entorno para producción
+### URLs de API por Entorno
+- **Desarrollo**: `http://localhost:3000`
+- **Preview**: `https://services.sweetmoments.mx`
+- **Producción**: `https://services.sweetmoments.mx`
 
-### URLs por Entorno
+## 🚀 Comandos de Configuración
 
-| Entorno | URL de la API | Descripción |
-|---------|---------------|-------------|
-| **Desarrollo** | `http://192.168.3.19:3000` | Servidor local para desarrollo |
-| **Producción** | `https://services.sweetmoments.mx` | Servidor de producción |
-
-## 🚀 Scripts Disponibles
-
-### Configuración de Entorno
-```bash
-# Configurar entorno de desarrollo
-npm run set-env:dev
-
-# Configurar entorno de producción
-npm run set-env:prod
-```
-
-### Desarrollo
-```bash
-# Iniciar en modo desarrollo (usa configuración de .env)
-npm run start:dev
-npm run android:dev
-npm run ios:dev
-npm run web:dev
-```
-
-### Producción
-```bash
-# Iniciar en modo producción (usa configuración de .env)
-npm run start:prod
-npm run android:prod
-npm run ios:prod
-npm run web:prod
-```
-
-### Construcción
-```bash
-# Construir para producción
-npm run build:android
-npm run build:ios
-npm run build:web
-```
-
-## 🔧 Configuración de Variables de Entorno
-
-### Variables Disponibles
-
-| Variable | Desarrollo | Producción | Descripción |
-|----------|------------|------------|-------------|
-| `EXPO_PUBLIC_ENV` | `development` | `production` | Entorno actual |
-| `EXPO_PUBLIC_API_URL` | `http://192.168.3.19:3000` | `https://services.sweetmoments.mx` | URL de la API |
-| `EXPO_PUBLIC_API_TIMEOUT` | `10000` | `15000` | Timeout de la API (ms) |
-| `EXPO_PUBLIC_LOG_REQUESTS` | `true` | `false` | Log de requests |
-| `EXPO_PUBLIC_LOG_RESPONSES` | `true` | `false` | Log de responses |
-
-### Configuración de Notificaciones
-
-| Variable | Valor | Descripción |
-|----------|-------|-------------|
-| `EXPO_PUBLIC_NOTIFICATION_DEFAULT_TIME` | `08:00` | Hora por defecto para notificaciones |
-| `EXPO_PUBLIC_NOTIFICATION_URGENT_THRESHOLD` | `2` | Horas para considerar pedido urgente |
-| `EXPO_PUBLIC_NOTIFICATION_URGENT_REMINDER` | `1` | Horas antes para recordatorio urgente |
-
-## 📱 Indicador de Entorno
-
-La aplicación incluye un indicador visual del entorno actual:
-
-- **Desarrollo**: Badge naranja con "DEV" y URL de la API
-- **Producción**: Badge verde con "PROD" (solo si se especifica)
-
-## 🔄 Cómo Cambiar de Entorno
-
-### Método 1: Script de Configuración (Recomendado)
+### Cambiar Entorno Manualmente
 ```bash
 # Configurar para desarrollo
 npm run set-env:dev
+
+# Configurar para preview
+npm run set-env:preview
 
 # Configurar para producción
 npm run set-env:prod
 ```
 
-### Método 2: Scripts de Inicio
+### Iniciar la Aplicación
 ```bash
-# Desarrollo (usa configuración actual de .env)
+# Desarrollo
 npm run start:dev
 
-# Producción (usa configuración actual de .env)
+# Producción
 npm run start:prod
 ```
 
-### Método 3: Manual
-Copiar el contenido de `env.development` o `env.production` a un archivo `.env` en la raíz del proyecto.
+## 📱 Builds de la Aplicación
 
-## 🛠️ Configuración de la API
+### Build Preview (APK)
+```bash
+npm run build:preview
+```
+- Genera un APK para pruebas
+- Apunta a `https://services.sweetmoments.mx`
+- Distribución interna
 
-La configuración de la API se maneja automáticamente según el entorno:
+### Build Producción (AAB)
+```bash
+npm run build:production
+```
+- Genera un AAB para Google Play Store
+- Apunta a `https://services.sweetmoments.mx`
+- Optimizado para producción
 
-```typescript
-// constants/Config.ts
-export const ENV = {
-  API_URL: __DEV__ 
-    ? 'http://192.168.3.19:3000'  // Desarrollo
-    : 'https://services.sweetmoments.mx', // Producción
-};
+### Build Manual con EAS
+```bash
+# Preview
+npx eas build --platform android --profile preview
+
+# Producción
+npx eas build --platform android --profile production
 ```
 
-### Características por Entorno
+## 🔧 Configuración de Variables
 
-#### Desarrollo
-- ✅ Logging detallado de requests/responses
-- ✅ Timeout más corto (10s)
-- ✅ Indicador visual del entorno
-- ✅ URL local
+### Variables Principales
+- `EXPO_PUBLIC_ENV` - Entorno actual (development/preview/production)
+- `EXPO_PUBLIC_API_URL` - URL del servidor de API
+- `EXPO_PUBLIC_APP_NAME` - Nombre de la aplicación
+- `EXPO_PUBLIC_VERSION` - Versión de la aplicación
 
-#### Producción
-- ❌ Logging deshabilitado
-- ✅ Timeout más largo (15s)
-- ✅ URL de producción
-- ❌ Indicador visual (opcional)
+### Configuración de API
+- `EXPO_PUBLIC_API_TIMEOUT` - Timeout de requests (ms)
+- `EXPO_PUBLIC_API_RETRY_ATTEMPTS` - Intentos de reintento
+- `EXPO_PUBLIC_API_RETRY_DELAY` - Delay entre reintentos (ms)
 
-## 🔍 Verificación del Entorno
+### Configuración de Logging
+- `EXPO_PUBLIC_LOG_REQUESTS` - Log de requests (true/false)
+- `EXPO_PUBLIC_LOG_RESPONSES` - Log de responses (true/false)
 
-Para verificar que estás usando el entorno correcto:
+## 📋 Flujo de Trabajo Recomendado
 
-1. **Indicador Visual**: Busca el badge en la esquina superior derecha
-2. **Logs de Consola**: En desarrollo verás logs de API
-3. **URL de la API**: Verifica en los logs que use la URL correcta
+### Para Desarrollo
+1. Ejecutar `npm run set-env:dev`
+2. Iniciar servidor local en `http://localhost:3000`
+3. Ejecutar `npm run start:dev`
 
-## 🚨 Consideraciones Importantes
+### Para Testing
+1. Ejecutar `npm run build:preview`
+2. Instalar APK en dispositivo/emulador
+3. Probar funcionalidades
 
-### Desarrollo
-- Asegúrate de que tu servidor local esté corriendo en `192.168.3.19:3000`
-- Las notificaciones push no funcionan en Expo Go
-- Usa `npm run start:dev` para desarrollo
+### Para Producción
+1. Ejecutar `npm run build:production`
+2. Subir AAB a Google Play Console
 
-### Producción
-- Verifica que `https://services.sweetmoments.mx` esté disponible
-- Usa un development build para notificaciones completas
-- Usa `npm run start:prod` para pruebas de producción
+## 🔍 Verificación de Configuración
 
-## 📝 Personalización
+### Verificar Entorno Actual
+```bash
+# Ver contenido del archivo .env
+cat .env
 
-Para agregar nuevas variables de entorno:
+# Ver URL de API configurada
+grep EXPO_PUBLIC_API_URL .env
+```
 
-1. Agregar la variable a `env.development` y `env.production`
-2. Actualizar `constants/Config.ts` para usar la variable
-3. Actualizar `app.config.js` si es necesario
-4. Documentar en este archivo
+### Verificar en la Aplicación
+La aplicación muestra el entorno actual en:
+- Nombre de la aplicación
+- Logs de consola
+- Información de debug
 
-## 🔧 Troubleshooting
+## ⚠️ Notas Importantes
 
-### Problema: No se conecta a la API
-- Verifica que el servidor esté corriendo
-- Confirma que estés usando el entorno correcto
-- Revisa los logs de la consola
+1. **Archivo .env**: Se genera automáticamente, no editar manualmente
+2. **Servidor Local**: Asegúrate de que el servidor esté corriendo en `localhost:3000` para desarrollo
+3. **Builds**: Los builds de EAS usan las variables de entorno configuradas en `eas.json`
+4. **Caché**: Limpia el caché si hay problemas: `npx expo start --clear`
 
-### Problema: Variables de entorno no se cargan
-- Ejecuta `npm run set-env:dev` o `npm run set-env:prod` para configurar el entorno
-- Reinicia el servidor de desarrollo
-- Verifica que el archivo `.env` esté en la raíz
-- Confirma que las variables empiecen con `EXPO_PUBLIC_`
+## 🛠️ Solución de Problemas
 
-### Problema: Indicador de entorno no aparece
-- Verifica que `EnvironmentInfo` esté importado en `_layout.tsx`
-- Confirma que no estés en producción (por defecto se oculta)
-- Revisa que el componente esté renderizado correctamente
+### Error de Conexión a API
+- Verificar que el servidor esté corriendo
+- Verificar URL en el archivo `.env`
+- Verificar configuración de red
+
+### Build Fallido
+- Verificar configuración en `eas.json`
+- Verificar variables de entorno
+- Revisar logs de EAS Build
+
+### Problemas de Caché
+```bash
+npx expo start --clear
+npx expo install --fix
+```
