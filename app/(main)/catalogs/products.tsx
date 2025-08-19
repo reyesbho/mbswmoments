@@ -3,11 +3,14 @@ import { ProductItem } from '@/components/ProductItem';
 import { useCreateProduct, useDeleteProduct, useProducts, useUpdateProduct, useUpdateProductStatus } from '@/hooks/useApi';
 import { Product } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImageManipulator from 'expo-image-manipulator';
+import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
   Alert,
   FlatList,
+  Image,
   Modal,
   StyleSheet,
   Text,
@@ -166,6 +169,7 @@ function ProductModal({ visible, product, onClose, onSave }: ProductModalProps) 
     estatus: true,
     tag: '',
   });
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   React.useEffect(() => {
     if (product) {
@@ -175,6 +179,7 @@ function ProductModal({ visible, product, onClose, onSave }: ProductModalProps) 
         estatus: product.estatus,
         tag: product.tag || '',
       });
+      setImagePreview(product.imagen || null);
     } else {
       setFormData({
         descripcion: '',
@@ -182,8 +187,80 @@ function ProductModal({ visible, product, onClose, onSave }: ProductModalProps) 
         estatus: true,
         tag: '',
       });
+      setImagePreview(null);
     }
   }, [product]);
+
+  const convertImageToWebP = async (uri: string): Promise<string> => {
+    try {
+      const result = await ImageManipulator.manipulateAsync(
+        uri,
+        [{ resize: { width: 150, height: 150 } }],
+        {
+          compress: 0.8,
+          format: ImageManipulator.SaveFormat.WEBP,
+          base64: true,
+        }
+      );
+      
+      if (result.base64) {
+        return `data:image/webp;base64,${result.base64}`;
+      }
+      throw new Error('No se pudo convertir la imagen a base64');
+    } catch (error) {
+      console.error('Error al convertir imagen:', error);
+      throw new Error('Error al procesar la imagen');
+    }
+  };
+
+  const handleImagePick = async () => {
+    try {
+      // Request permissions
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permisos requeridos', 'Se necesitan permisos para acceder a la galería');
+        return;
+      }
+
+      // Launch image picker
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
+      });
+
+      if (!result.canceled && result.assets && result.assets[0]) {
+        const selectedImage = result.assets[0];
+        
+        // Check file size (5MB limit)
+        if (selectedImage.fileSize && selectedImage.fileSize > 5242880) {
+          Alert.alert('Error', 'Tamaño máximo 5MB');
+          return;
+        }
+
+        // Show preview immediately
+        setImagePreview(selectedImage.uri);
+
+        // Convert to WebP and base64
+        try {
+          const base64Image = await convertImageToWebP(selectedImage.uri);
+          setFormData(prev => ({ ...prev, imagen: base64Image }));
+        } catch (error: any) {
+          Alert.alert('Error', error.message || 'Error al procesar la imagen');
+          setImagePreview(null);
+        }
+      }
+    } catch (error) {
+      console.error('Error al seleccionar imagen:', error);
+      Alert.alert('Error', 'Error al seleccionar la imagen');
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setImagePreview(null);
+    setFormData(prev => ({ ...prev, imagen: '' }));
+  };
 
   const handleSave = async () => {
     if (!formData.descripcion.trim()) {
@@ -222,13 +299,25 @@ function ProductModal({ visible, product, onClose, onSave }: ProductModalProps) 
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>URL de Imagen</Text>
-            <TextInput
-              style={styles.textInput}
-              value={formData.imagen}
-              onChangeText={(value) => setFormData(prev => ({ ...prev, imagen: value }))}
-              placeholder="https://ejemplo.com/imagen.jpg"
-            />
+            <Text style={styles.inputLabel}>Imagen del Producto</Text>
+            
+            {imagePreview ? (
+              <View style={styles.imagePreviewContainer}>
+                <Image source={{ uri: imagePreview }} style={styles.imagePreview} />
+                <TouchableOpacity 
+                  style={styles.removeImageButton} 
+                  onPress={handleRemoveImage}
+                >
+                  <Ionicons name="close-circle" size={24} color="#E74C3C" />
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <TouchableOpacity style={styles.imagePickerButton} onPress={handleImagePick}>
+                <Ionicons name="camera-outline" size={32} color="#7F8C8D" />
+                <Text style={styles.imagePickerText}>Seleccionar imagen</Text>
+                <Text style={styles.imagePickerSubtext}>Máximo 5MB</Text>
+              </TouchableOpacity>
+            )}
           </View>
 
           <View style={styles.inputContainer}>
@@ -419,5 +508,46 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: 'white',
+  },
+  // Image picker styles
+  imagePreviewContainer: {
+    position: 'relative',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  imagePreview: {
+    width: 120,
+    height: 120,
+    borderRadius: 12,
+    backgroundColor: '#F8F9FA',
+  },
+  removeImageButton: {
+    position: 'absolute',
+    top: -8,
+    right: -8,
+    backgroundColor: 'white',
+    borderRadius: 12,
+  },
+  imagePickerButton: {
+    backgroundColor: '#F8F9FA',
+    borderWidth: 2,
+    borderColor: '#E9ECEF',
+    borderStyle: 'dashed',
+    borderRadius: 12,
+    padding: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 8,
+  },
+  imagePickerText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#7F8C8D',
+    marginTop: 8,
+  },
+  imagePickerSubtext: {
+    fontSize: 12,
+    color: '#BDC3C7',
+    marginTop: 4,
   },
 }); 
