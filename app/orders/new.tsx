@@ -6,6 +6,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
+  Image,
   Modal,
   ScrollView,
   StyleSheet,
@@ -484,6 +485,7 @@ function ProductSelectionModal({
                     clearModalError('producto');
                   }}
                 >
+                  <Image source={{ uri: product.imagen }} style={styles.productImage} />
                   <Text style={[
                     styles.productOptionText,
                     selectedProduct?.id === product.id && styles.selectedProductOptionText,
@@ -623,6 +625,13 @@ function ProductSelectionModal({
   }
 
 const styles = StyleSheet.create({
+  productImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+    aspectRatio: 1,
+    resizeMode: 'cover',
+  },
   container: {
     flex: 1,
     backgroundColor: '#F8F9FA',
@@ -868,6 +877,9 @@ const styles = StyleSheet.create({
     marginRight: 12,
     borderWidth: 1,
     borderColor: '#E9ECEF',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 12,
   },
   selectedProductOption: {
     backgroundColor: '#4ECDC4',
@@ -915,11 +927,14 @@ const styles = StyleSheet.create({
     color: '#2C3E50',
     borderWidth: 1,
     borderColor: '#E9ECEF',
+    width: '85%',
   },
   characteristicInput: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
+    display: 'flex',
+    justifyContent: 'space-between',
   },
   addCharButton: {
     backgroundColor: '#4ECDC4',
