@@ -1,7 +1,7 @@
 import { Colors, ColorUtils } from '@/constants/Colors';
 import { useColorScheme as useSystemColorScheme } from 'react-native';
 
-export const useColorScheme = () => {
+export const useColorScheme = (): 'light' | 'dark' => {
   const colorScheme = useSystemColorScheme();
   return colorScheme === 'dark' ? 'dark' : 'light';
 };

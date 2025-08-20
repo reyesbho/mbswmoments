@@ -67,6 +67,18 @@ export default function MainLayout() {
                name="catalogs" />
               <Tabs.Screen
                 options={{
+                  title: 'Calendario',
+                  tabBarIcon: ({ color, focused }) => (
+                    <Ionicons
+                      name={focused ? 'calendar' : 'calendar-outline'}
+                      size={20}
+                      color={color}
+                    />
+                  )
+                }}
+               name="calendar" />
+              <Tabs.Screen
+                options={{
                   title: 'Perfil',
                   tabBarIcon: ({ color, focused }) => (
                     <Ionicons
