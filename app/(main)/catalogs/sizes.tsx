@@ -1,4 +1,5 @@
 import { HeaderView } from '@/components/HeaderView';
+import Toast, { useToast } from '@/components/Toast';
 import { useCreateSize, useDeleteSize, useSizes, useUpdateSize, useUpdateSizeStatus } from '@/hooks/useApi';
 import { SizeProduct } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,14 +9,13 @@ import {
   Alert,
   FlatList,
   Modal,
+  RefreshControl,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
-  RefreshControl
+  View
 } from 'react-native';
-import Toast, { useToast } from '@/components/Toast';
 
 export default function SizesScreen() {
   const router = useRouter();
@@ -58,6 +58,7 @@ export default function SizesScreen() {
             try {
               await deleteSizeMutation.mutateAsync(size.id);
               showSuccess('Tamaño eliminado correctamente');
+              refetch(); // Refrescar la lista después de eliminar
             } catch (error: any) {
               showError(error.message || 'Error al eliminar el tamaño');
             }
@@ -74,6 +75,7 @@ export default function SizesScreen() {
         estatus: !size.estatus,
       });
       showSuccess('Estado actualizado correctamente');
+      refetch(); // Refrescar la lista después de actualizar el estado
     } catch (error: any) {
       showError(error.message || 'Error al actualizar el estado');
     }
@@ -192,7 +194,10 @@ export default function SizesScreen() {
       {/* Add/Edit Size Modal */}
       <SizeModal
         visible={showModal}
-        onClose={() => setShowModal(false)}
+        onClose={() => {
+          setShowModal(false);
+          refetch(); // Refrescar la lista al cerrar el modal
+        }}
         editingSize={editingSize}
         onSave={async (sizeData) => {
           try {
@@ -207,6 +212,7 @@ export default function SizesScreen() {
               showSuccess('Tamaño creado correctamente');
             }
             setShowModal(false);
+            refetch(); // Refrescar la lista después de guardar
           } catch (error: any) {
             showError(error.message || 'Error al guardar el tamaño');
           }
