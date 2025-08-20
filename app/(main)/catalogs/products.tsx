@@ -59,6 +59,8 @@ export default function ProductsScreen() {
             try {
               await deleteProductMutation.mutateAsync(product.id);
               Alert.alert('Éxito', 'Producto eliminado correctamente');
+              // Refrescar la lista de productos después de eliminar exitosamente
+              refetch();
             } catch (error: any) {
               Alert.alert('Error', error.message || 'Error al eliminar el producto');
             }
@@ -74,6 +76,8 @@ export default function ProductsScreen() {
         id: product.id,
         estatus: !product.estatus,
       });
+      // Refrescar la lista de productos después de actualizar el estado exitosamente
+      refetch();
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Error al actualizar el estado');
     }
@@ -146,6 +150,8 @@ export default function ProductsScreen() {
               Alert.alert('Éxito', 'Producto creado correctamente');
             }
             setShowModal(false);
+            // Refrescar la lista de productos después de guardar exitosamente
+            refetch();
           } catch (error: any) {
             Alert.alert('Error', error.message || 'Error al guardar el producto');
           }
@@ -171,25 +177,37 @@ function ProductModal({ visible, product, onClose, onSave }: ProductModalProps) 
   });
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
+  // Función para resetear todos los valores del formulario
+  const resetForm = () => {
+    setFormData({
+      descripcion: '',
+      imagen: '',
+      estatus: true,
+      tag: '',
+    });
+    setImagePreview(null);
+  };
+
   React.useEffect(() => {
+    console.log('useEffect ejecutado con product:', product?.id);
     if (product) {
-      setFormData({
+      const newFormData = {
         descripcion: product.descripcion,
         imagen: product.imagen || '',
         estatus: product.estatus,
         tag: product.tag || '',
+      };
+      console.log('Inicializando formData con producto existente:', {
+        ...newFormData,
+        imagen: newFormData.imagen ? newFormData.imagen.substring(0, 50) + '...' : 'sin imagen'
       });
+      setFormData(newFormData);
       setImagePreview(product.imagen || null);
     } else {
-      setFormData({
-        descripcion: '',
-        imagen: '',
-        estatus: true,
-        tag: '',
-      });
-      setImagePreview(null);
+      console.log('Inicializando formData para nuevo producto');
+      resetForm();
     }
-  }, [product]);
+  }, [product?.id]); // Solo se ejecuta cuando cambia el ID del producto
 
   const convertImageToWebP = async (uri: string): Promise<string> => {
     try {
@@ -225,8 +243,7 @@ function ProductModal({ visible, product, onClose, onSave }: ProductModalProps) 
       // Launch image picker
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
+        allowsEditing: false,
         quality: 1,
       });
 
@@ -239,13 +256,20 @@ function ProductModal({ visible, product, onClose, onSave }: ProductModalProps) 
           return;
         }
 
-        // Show preview immediately
+        // Show preview immediately with temporary URI
         setImagePreview(selectedImage.uri);
 
         // Convert to WebP and base64
         try {
           const base64Image = await convertImageToWebP(selectedImage.uri);
-          setFormData(prev => ({ ...prev, imagen: base64Image }));
+          console.log('Imagen convertida a base64:', base64Image.substring(0, 50) + '...');
+          setFormData(prev => {
+            const newFormData = { ...prev, imagen: base64Image };
+            console.log('FormData actualizado:', { ...newFormData, imagen: newFormData.imagen.substring(0, 50) + '...' });
+            return newFormData;
+          });
+          // Update preview with the converted base64 image
+          setImagePreview(base64Image);
         } catch (error: any) {
           Alert.alert('Error', error.message || 'Error al procesar la imagen');
           setImagePreview(null);
@@ -262,13 +286,25 @@ function ProductModal({ visible, product, onClose, onSave }: ProductModalProps) 
     setFormData(prev => ({ ...prev, imagen: '' }));
   };
 
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
+
   const handleSave = async () => {
     if (!formData.descripcion.trim()) {
       Alert.alert('Error', 'La descripción es requerida');
       return;
     }
 
+    console.log('Guardando producto con formData:', {
+      ...formData,
+      imagen: formData.imagen ? formData.imagen.substring(0, 50) + '...' : 'sin imagen'
+    });
+
     await onSave(formData);
+    // Resetear el formulario después de guardar exitosamente
+    resetForm();
   };
 
   return (
@@ -282,7 +318,7 @@ function ProductModal({ visible, product, onClose, onSave }: ProductModalProps) 
           <Text style={styles.modalTitle}>
             {product ? 'Editar Producto' : 'Nuevo Producto'}
           </Text>
-          <TouchableOpacity onPress={onClose}>
+          <TouchableOpacity onPress={handleClose}>
             <Ionicons name="close" size={24} color="#2C3E50" />
           </TouchableOpacity>
         </View>
@@ -348,7 +384,7 @@ function ProductModal({ visible, product, onClose, onSave }: ProductModalProps) 
         </View>
 
         <View style={styles.modalFooter}>
-          <TouchableOpacity onPress={onClose} style={styles.cancelButton}>
+          <TouchableOpacity onPress={handleClose} style={styles.cancelButton}>
             <Text style={styles.cancelButtonText}>Cancelar</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={handleSave} style={styles.saveButton}>

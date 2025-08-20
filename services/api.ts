@@ -201,7 +201,8 @@ class ApiService {
   }
 
   async updateProduct(id: string, product: Partial<Product>): Promise<Product> {
-    return this.patch<Product>(`/api/products/${id}`, { estatus: product.estatus });
+    console.log('Actualizando producto:', product);
+    return this.patch<Product>(`/api/products/${id}`, product);
   }
 
   async updateProductStatus(id: string, estatus: boolean): Promise<Product> {
