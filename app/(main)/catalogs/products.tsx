@@ -11,7 +11,10 @@ import {
   Alert,
   FlatList,
   Image,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -313,7 +316,11 @@ function ProductModal({ visible, product, onClose, onSave }: ProductModalProps) 
       animationType="slide"
       presentationStyle="pageSheet"
     >
-      <View style={styles.modalContainer}>
+      <KeyboardAvoidingView 
+        style={styles.modalContainer}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      >
         <View style={styles.modalHeader}>
           <Text style={styles.modalTitle}>
             {product ? 'Editar Producto' : 'Nuevo Producto'}
@@ -323,7 +330,11 @@ function ProductModal({ visible, product, onClose, onSave }: ProductModalProps) 
           </TouchableOpacity>
         </View>
 
-        <View style={styles.modalContent}>
+        <ScrollView 
+          style={styles.modalContent}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.modalContentContainer}
+        >
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Descripción *</Text>
             <TextInput
@@ -381,7 +392,7 @@ function ProductModal({ visible, product, onClose, onSave }: ProductModalProps) 
               ]} />
             </TouchableOpacity>
           </View>
-        </View>
+        </ScrollView>
 
         <View style={styles.modalFooter}>
           <TouchableOpacity onPress={handleClose} style={styles.cancelButton}>
@@ -391,7 +402,7 @@ function ProductModal({ visible, product, onClose, onSave }: ProductModalProps) 
             <Text style={styles.saveButtonText}>Guardar</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
@@ -475,8 +486,11 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     flex: 1,
+  },
+  modalContentContainer: {
     paddingHorizontal: 20,
     paddingTop: 20,
+    paddingBottom: 20,
   },
   inputContainer: {
     marginBottom: 20,
