@@ -188,8 +188,8 @@ class ApiService {
   }
 
   // Product methods
-  async getProducts(estatus?: string): Promise<Product[]> {
-    return this.get<Product[]>(`/api/products${estatus ? `?estatus=${estatus}` : ''}`);
+  async getProducts(estatus?: boolean): Promise<Product[]> {
+    return this.get<Product[]>(`/api/products${estatus !== undefined ? `?estatus=${estatus}` : ''}`);
   }
 
   async getProduct(id: string): Promise<Product> {
@@ -214,8 +214,8 @@ class ApiService {
   }
 
   // Size methods
-  async getSizes(estatus?: string): Promise<SizeProduct[]> {
-    return this.get<SizeProduct[]>(`/api/sizes${estatus ? `?estatus=${estatus}` : ''}`);
+  async getSizes(estatus?: boolean): Promise<SizeProduct[]> {
+    return this.get<SizeProduct[]>(`/api/sizes${estatus !== undefined ? `?estatus=${estatus}` : ''}`);
   }
 
   async getSize(id: string): Promise<SizeProduct> {

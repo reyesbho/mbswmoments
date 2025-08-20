@@ -30,8 +30,8 @@ interface FormErrors {
 
 export default function NewOrderScreen() {
   const router = useRouter();
-  const { data: products } = useProducts('ACTIVO');
-  const { data: sizes } = useSizes('ACTIVO');
+  const { data: products } = useProducts(true);
+  const { data: sizes } = useSizes(true);
   const createOrderMutation = useCreateOrder();
   const { toast, showToast, hideToast, showSuccess, showError } = useToast();
   

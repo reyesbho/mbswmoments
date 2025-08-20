@@ -42,7 +42,7 @@ export const useLogout = () => {
 };
 
 // Product hooks
-export const useProducts = (estatus?: string) => {
+export const useProducts = (estatus?: boolean) => {
   return useQuery({
     queryKey: ['products'],
     queryFn: async () => {
@@ -108,7 +108,7 @@ export const useDeleteProduct = () => {
 };
 
 // Size hooks
-export const useSizes = (estatus?: string) => {
+export const useSizes = (estatus?: boolean) => {
   return useQuery({
     queryKey: ['sizes'],
     queryFn: async () => {
