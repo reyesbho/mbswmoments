@@ -1,3 +1,4 @@
+import Toast, { useToast } from '@/components/Toast';
 import { useCreateOrder, useProducts, useSizes } from '@/hooks/useApi';
 import { OrderProduct, Product, SizeProduct } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
@@ -13,7 +14,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import Toast, { useToast } from '@/components/Toast';
 
 interface FormData {
   cliente: string;
@@ -29,8 +29,8 @@ interface FormErrors {
 
 export default function NewOrderScreen() {
   const router = useRouter();
-  const { data: products } = useProducts();
-  const { data: sizes } = useSizes();
+  const { data: products } = useProducts('ACTIVO');
+  const { data: sizes } = useSizes('ACTIVO');
   const createOrderMutation = useCreateOrder();
   const { toast, showToast, hideToast, showSuccess, showError } = useToast();
   

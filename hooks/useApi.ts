@@ -42,11 +42,11 @@ export const useLogout = () => {
 };
 
 // Product hooks
-export const useProducts = () => {
+export const useProducts = (estatus?: string) => {
   return useQuery({
     queryKey: ['products'],
     queryFn: async () => {
-      return apiService.getProducts();
+      return apiService.getProducts(estatus);
     },
     retry: false, // No retry for any errors
   });
@@ -108,11 +108,11 @@ export const useDeleteProduct = () => {
 };
 
 // Size hooks
-export const useSizes = () => {
+export const useSizes = (estatus?: string) => {
   return useQuery({
     queryKey: ['sizes'],
     queryFn: async () => {
-      return apiService.getSizes();
+      return apiService.getSizes(estatus);
     },
     retry: false, // No retry for any errors
   });
