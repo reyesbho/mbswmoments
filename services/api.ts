@@ -322,8 +322,8 @@ class ApiService {
       `/api/public/pedidos?${queryString}`);
     
     // Handle the correct response structure
-    console.log('response', response);
-    if (response && Array.isArray(response)) {
+     if (response && Array.isArray(response)) {
+      // Fallback para respuestas que vienen directamente como array
       return response;
     } else {
       return [];

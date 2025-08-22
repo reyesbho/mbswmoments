@@ -121,10 +121,15 @@ export class NotificationService {
   private async getTodaysOrders(): Promise<Order[]> {
     try {
       const today = new Date();
+      const todayString = formatDate(today, 'dd-MM-yyyy');
+      
       const allOrders = await apiService.getOrdersPublic({
-        fechaInicio: formatDate(today, 'dd-MM-yyyy'),
-        fechaFin: formatDate(today, 'dd-MM-yyyy'),
+        fechaInicio: todayString,
+        fechaFin: todayString,
+        estatus: 'ALL',
+        pageSize: 100
       });
+      
       console.log('allOrders', allOrders);
       return allOrders;
     } catch (error) {

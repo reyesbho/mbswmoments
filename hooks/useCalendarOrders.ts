@@ -1,5 +1,6 @@
-import { apiService } from '@/services/api';
+import { useOrdersByDateRange } from '@/hooks/useApi';
 import { Order } from '@/types';
+import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
 import { Alert } from 'react-native';
 
@@ -9,7 +10,6 @@ interface OrdersByDay {
 
 export const useCalendarOrders = (selectedDate: Date) => {
   const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(false);
   const [ordersByDay, setOrdersByDay] = useState<OrdersByDay>({});
 
   // Función para convertir timestamp de Firestore a Date
@@ -17,26 +17,25 @@ export const useCalendarOrders = (selectedDate: Date) => {
     return new Date(timestamp.seconds * 1000);
   };
 
-  // Función para cargar pedidos del mes seleccionado
-  const loadOrders = async () => {
-    setLoading(true);
-    try {
-      const allOrders = await apiService.getOrders();
-      
-      // Filtrar pedidos del mes seleccionado
-      const startOfMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
-      const endOfMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0);
-      
-      const filteredOrders = allOrders.filter(order => {
-        const orderDate = timestampToDate(order.fechaEntrega);
-        return orderDate >= startOfMonth && orderDate <= endOfMonth;
-      });
+  // Calcular fechas de inicio y fin del mes
+  const startOfMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+  const endOfMonth = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 0);
+  
+  // Formatear fechas para la API
+  const fechaInicio = format(startOfMonth, 'dd-MM-yyyy');
+  const fechaFin = format(endOfMonth, 'dd-MM-yyyy');
+  
+  // Usar el hook específico para obtener órdenes del mes
+  const { data: allOrders, isLoading, error } = useOrdersByDateRange(fechaInicio, fechaFin, 'ALL');
 
-      setOrders(filteredOrders);
+  // Procesar órdenes cuando cambien los datos
+  useEffect(() => {
+    if (allOrders) {
+      setOrders(allOrders);
       
       // Organizar pedidos por día
       const grouped: OrdersByDay = {};
-      filteredOrders.forEach(order => {
+      allOrders.forEach(order => {
         const orderDate = timestampToDate(order.fechaEntrega);
         const dateKey = orderDate.toISOString().split('T')[0]; // YYYY-MM-DD
         
@@ -56,23 +55,21 @@ export const useCalendarOrders = (selectedDate: Date) => {
       });
 
       setOrdersByDay(grouped);
-    } catch (error) {
+    }
+  }, [allOrders]);
+
+  // Manejar errores
+  useEffect(() => {
+    if (error) {
       console.error('Error loading orders:', error);
       Alert.alert('Error', 'No se pudieron cargar los pedidos');
-    } finally {
-      setLoading(false);
     }
-  };
-
-  // Cargar pedidos cuando cambie la fecha seleccionada
-  useEffect(() => {
-    loadOrders();
-  }, [selectedDate]);
+  }, [error]);
 
   return {
     orders,
-    loading,
+    loading: isLoading,
     ordersByDay,
-    loadOrders,
+    loadOrders: () => {}, // Ya no necesitamos esta función manual
   };
 };

@@ -174,13 +174,72 @@ export const useDeleteSize = () => {
 };
 
 // Order hooks
-export const useOrders = () => {
+export const useOrders = (params?: {
+  fechaInicio?: string;
+  fechaFin?: string;
+  estatus?: string;
+  cursorFechaCreacion?: string;
+  pageSize?: number;
+}) => {
   return useQuery({
-    queryKey: ['orders'],
+    queryKey: ['orders', params],
     queryFn: async () => {
-      return apiService.getOrders();
+      return apiService.getOrders(params || {});
     },
     retry: false, // No retry for any errors
+  });
+};
+
+// Hook específico para órdenes de hoy
+export const useTodaysOrders = () => {
+  const today = new Date();
+  const todayString = today.toISOString().split('T')[0];
+  
+  return useQuery({
+    queryKey: ['orders', 'today', todayString],
+    queryFn: async () => {
+      return apiService.getOrders({
+        fechaInicio: todayString,
+        fechaFin: todayString,
+        estatus: 'ALL',
+        pageSize: 100
+      });
+    },
+    retry: false,
+  });
+};
+
+// Hook específico para órdenes de un rango de fechas
+export const useOrdersByDateRange = (fechaInicio: string, fechaFin: string, estatus: string = 'ALL') => {
+  return useQuery({
+    queryKey: ['orders', 'dateRange', fechaInicio, fechaFin, estatus],
+    queryFn: async () => {
+      return apiService.getOrders({
+        fechaInicio,
+        fechaFin,
+        estatus,
+        pageSize: 100
+      });
+    },
+    retry: false,
+    enabled: !!fechaInicio && !!fechaFin,
+  });
+};
+
+// Hook para órdenes públicas (sin autenticación)
+export const usePublicOrders = (params?: {
+  fechaInicio?: string;
+  fechaFin?: string;
+  estatus?: string;
+  cursorFechaCreacion?: string;
+  pageSize?: number;
+}) => {
+  return useQuery({
+    queryKey: ['publicOrders', params],
+    queryFn: async () => {
+      return apiService.getOrdersPublic(params || {});
+    },
+    retry: false,
   });
 };
 
