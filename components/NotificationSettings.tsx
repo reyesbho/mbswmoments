@@ -12,16 +12,6 @@ import {
     View
 } from 'react-native';
 
-const DAYS_OF_WEEK = [
-  { key: 1, label: 'Lunes', short: 'Lun' },
-  { key: 2, label: 'Martes', short: 'Mar' },
-  { key: 3, label: 'Miércoles', short: 'Mié' },
-  { key: 4, label: 'Jueves', short: 'Jue' },
-  { key: 5, label: 'Viernes', short: 'Vie' },
-  { key: 6, label: 'Sábado', short: 'Sáb' },
-  { key: 0, label: 'Domingo', short: 'Dom' },
-];
-
 export default function NotificationSettings() {
   const {
     settings,
@@ -63,15 +53,6 @@ export default function NotificationSettings() {
       updateSettings({ time: timeString });
       showSuccess('Hora de notificación actualizada');
     }
-  };
-
-  const handleDayToggle = (dayKey: number) => {
-    const newDays = settings.daysOfWeek.includes(dayKey)
-      ? settings.daysOfWeek.filter(d => d !== dayKey)
-      : [...settings.daysOfWeek, dayKey].sort();
-    
-    updateSettings({ daysOfWeek: newDays });
-    showSuccess('Días de notificación actualizados');
   };
 
   const handleSendTestNotification = async () => {
@@ -162,7 +143,7 @@ export default function NotificationSettings() {
               <View style={styles.toggleInfo}>
                 <Text style={styles.toggleTitle}>Notificaciones Automáticas</Text>
                 <Text style={styles.toggleDescription}>
-                  Recibe un resumen diario de tus pedidos programados
+                  Recibe un resumen diario de tus pedidos programados todos los días
                 </Text>
               </View>
               <Switch
@@ -198,35 +179,6 @@ export default function NotificationSettings() {
                 <Ionicons name="chevron-forward" size={16} color="#7F8C8D" />
               </View>
             </TouchableOpacity>
-          </View>
-        )}
-
-        {/* Días de la Semana */}
-        {settings.enabled && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Días de la Semana</Text>
-            <View style={styles.daysCard}>
-              {DAYS_OF_WEEK.map((day) => (
-                <TouchableOpacity
-                  key={day.key}
-                  style={[
-                    styles.dayButton,
-                    settings.daysOfWeek.includes(day.key) && styles.dayButtonActive,
-                  ]}
-                  onPress={() => handleDayToggle(day.key)}
-                  disabled={isLoading}
-                >
-                  <Text
-                    style={[
-                      styles.dayButtonText,
-                      settings.daysOfWeek.includes(day.key) && styles.dayButtonTextActive,
-                    ]}
-                  >
-                    {day.short}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
           </View>
         )}
 
@@ -459,37 +411,8 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#4ECDC4',
   },
-  daysCard: {
-    backgroundColor: 'white',
-    padding: 16,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  dayButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#E9ECEF',
-    marginBottom: 8,
-    alignItems: 'center',
-  },
-  dayButtonActive: {
-    backgroundColor: '#4ECDC4',
-    borderColor: '#4ECDC4',
-  },
-  dayButtonText: {
-    fontSize: 14,
-    color: '#2C3E50',
-    fontWeight: '500',
-  },
-  dayButtonTextActive: {
-    color: 'white',
-  },
+
+
   todaysOrdersCard: {
     backgroundColor: 'white',
     padding: 16,

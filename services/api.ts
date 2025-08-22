@@ -250,6 +250,17 @@ class ApiService {
     }
   }
 
+  async getOrdersPublic(): Promise<Order[]> {
+    const response = await this.get<PaginatedOrdersResponse>('/api/public/pedidos?estatus=ALL&pageSize=100');
+    
+    // Handle the correct response structure
+    if (response && Array.isArray(response.pedidos)) {
+      return response.pedidos;
+    } else {
+      return [];
+    }
+  }
+
   async getOrder(id: string): Promise<Order> {
     return this.get<Order>(`/api/pedidos/${id}`);
   }
