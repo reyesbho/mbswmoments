@@ -94,9 +94,6 @@ export default function OrdersScreen() {
     }
 
     switch (filterOrderStatus) {
-      case 'INCOMPLETE':
-        filtered = filtered.filter(order => order.estatus === 'INCOMPLETE');
-        break;
       case 'BACKLOG':
         filtered = filtered.filter(order => order.estatus === 'BACKLOG');
         break;
@@ -400,14 +397,6 @@ export default function OrdersScreen() {
           <View style={styles.filterSection}>
             <Text style={styles.filterSectionTitle}>Estado del pedido</Text>
             <View style={styles.filterChipsContainer}>
-              <TouchableOpacity
-                style={[styles.filterChip, filterOrderStatus === 'INCOMPLETE' && styles.activeFilterChip]}
-                onPress={() => setFilterOrderStatus('INCOMPLETE')}
-              >
-                <Text style={[styles.filterChipText, filterOrderStatus === 'INCOMPLETE' && styles.activeFilterChipText]}>
-                  Incompleto
-                </Text>
-              </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.filterChip, filterOrderStatus === 'BACKLOG' && styles.activeFilterChip]}
                 onPress={() => setFilterOrderStatus('BACKLOG')}
