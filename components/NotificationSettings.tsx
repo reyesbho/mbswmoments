@@ -143,7 +143,7 @@ export default function NotificationSettings() {
               <View style={styles.toggleInfo}>
                 <Text style={styles.toggleTitle}>Notificaciones Automáticas</Text>
                 <Text style={styles.toggleDescription}>
-                  Recibe un resumen diario de tus pedidos programados todos los días
+                  Recibe un resumen diario de tus pedidos programados todos los días (funciona sin conexión)
                 </Text>
               </View>
               <Switch

@@ -1,16 +1,24 @@
 import { NOTIFICATION_CONFIG, NOTIFICATION_TYPES } from '@/constants/Notifications';
 import { Order } from '@/types';
+import { formatDate } from 'date-fns';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import { apiService } from './api';
 
 // Configurar el comportamiento de las notificaciones
 Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
+  handleNotification: async (notification) => {
+    // Manejar notificaciones tanto en primer plano como en segundo plano
+    console.log('Notificación recibida:', notification);
+    
+    return {
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: false,
+      shouldShowBanner: true,
+      shouldShowList: true,
+    };
+  },
 });
 
 export interface NotificationSettings {
@@ -48,7 +56,13 @@ export class NotificationService {
       let finalStatus = existingStatus;
 
       if (existingStatus !== 'granted') {
-        const { status } = await Notifications.requestPermissionsAsync();
+        const { status } = await Notifications.requestPermissionsAsync({
+          ios: {
+            allowAlert: true,
+            allowBadge: true,
+            allowSound: true,
+          },
+        });
         finalStatus = status;
       }
 
@@ -57,10 +71,30 @@ export class NotificationService {
         return false;
       }
 
+      // Configurar para funcionar en segundo plano
+      await this.configureBackgroundNotifications();
       return true;
     } catch (error) {
       console.log('Error al solicitar permisos de notificación:', error);
       return false;
+    }
+  }
+
+  // Configurar notificaciones en segundo plano
+  private async configureBackgroundNotifications(): Promise<void> {
+    try {
+      // Configurar para que las notificaciones funcionen cuando la app esté cerrada
+      await Notifications.setNotificationChannelAsync('default', {
+        name: 'default',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
+        sound: 'default',
+        enableVibrate: true,
+        showBadge: true,
+      });
+    } catch (error) {
+      console.log('Error al configurar canal de notificaciones:', error);
     }
   }
 
@@ -83,21 +117,18 @@ export class NotificationService {
     }
   }
 
-  // Obtener pedidos para el día actual
+  // Obtener pedidos para el día actual (sin autenticación)
   private async getTodaysOrders(): Promise<Order[]> {
     try {
-      const allOrders = await apiService.getOrders();
       const today = new Date();
-      const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-      const endOfDay = new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000);
-
-      return allOrders.filter(order => {
-        const deliveryDate = new Date(order.fechaEntrega.seconds * 1000);
-        return deliveryDate >= startOfDay && deliveryDate < endOfDay && 
-               order.estatus !== 'DONE' && order.estatus !== 'CANCELED';
+      const allOrders = await apiService.getOrdersPublic({
+        fechaInicio: formatDate(today, 'dd-MM-yyyy'),
+        fechaFin: formatDate(today, 'dd-MM-yyyy'),
       });
+      console.log('allOrders', allOrders);
+      return allOrders;
     } catch (error) {
-      console.error('Error al obtener pedidos del día:', error);
+      console.error('Error al obtener los pedidos:', error);
       return [];
     }
   }
@@ -158,15 +189,13 @@ export class NotificationService {
         title: NOTIFICATION_CONFIG.TITLES.DAILY_SUMMARY,
         body: "Revisa los pedidos programados para hoy",
         data: { type: NOTIFICATION_TYPES.DAILY_SUMMARY },
+        sound: true,
+        priority: Notifications.AndroidNotificationPriority.HIGH,
       },
-      trigger: {
-        hour: hours,
-        minute: minutes,
-        repeats: true,
-      },
+      trigger: null, // Envío inmediato por ahora, se puede ajustar después
     });
 
-    console.log('Notificación diaria programada');
+    console.log('Notificación diaria programada para funcionar en segundo plano');
   }
 
   // Enviar notificación inmediata con pedidos del día
@@ -179,20 +208,22 @@ export class NotificationService {
     const todaysOrders = await this.getTodaysOrders();
     const message = this.createNotificationMessage(todaysOrders);
 
-         await Notifications.scheduleNotificationAsync({
-       content: {
-         title: NOTIFICATION_CONFIG.TITLES.TODAYS_ORDERS,
-         body: message,
-         data: { 
-           type: NOTIFICATION_TYPES.TODAYS_ORDERS,
-           ordersCount: todaysOrders.length,
-           orders: todaysOrders.map(order => ({
-             id: order.id,
-             cliente: order.cliente,
-             hora: new Date(order.fechaEntrega.seconds * 1000).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
-           }))
-         },
-       },
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: NOTIFICATION_CONFIG.TITLES.TODAYS_ORDERS,
+        body: message,
+        data: { 
+          type: NOTIFICATION_TYPES.TODAYS_ORDERS,
+          ordersCount: todaysOrders.length,
+          orders: todaysOrders.map(order => ({
+            id: order.id,
+            cliente: order.cliente,
+            hora: new Date(order.fechaEntrega.seconds * 1000).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })
+          }))
+        },
+        sound: true,
+        priority: Notifications.AndroidNotificationPriority.HIGH,
+      },
       trigger: null, // Envío inmediato
     });
   }
@@ -227,9 +258,7 @@ export class NotificationService {
                cliente: order.cliente
              },
            },
-          trigger: {
-            date: reminderTime,
-          },
+          trigger: null, // Envío inmediato por ahora
         });
       }
     }
@@ -254,6 +283,21 @@ export class NotificationService {
   // Verificar si las notificaciones están habilitadas
   isEnabled(): boolean {
     return this.settings.enabled;
+  }
+
+  // Inicializar notificaciones (llamar al iniciar la app)
+  async initialize(): Promise<void> {
+    try {
+      // Configurar el canal de notificaciones
+      await this.configureBackgroundNotifications();
+      
+      // Si las notificaciones están habilitadas, reprogramarlas
+      if (this.settings.enabled) {
+        await this.scheduleDailyNotification();
+      }
+    } catch (error) {
+      console.error('Error al inicializar notificaciones:', error);
+    }
   }
 
   // Obtener pedidos del día para mostrar en la UI

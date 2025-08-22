@@ -239,8 +239,42 @@ class ApiService {
   }
 
   // Order methods
-  async getOrders(): Promise<Order[]> {
-    const response = await this.get<PaginatedOrdersResponse>('/api/pedidos?estatus=ALL&pageSize=100');
+  //fechaInicio, fechaFin, estatus, cursorFechaCreacion, pageSize
+  async getOrders({ fechaInicio,
+    fechaFin,
+    estatus = 'ALL',
+    cursorFechaCreacion,
+    pageSize = 100,
+  }: {
+    fechaInicio?: string;
+    fechaFin?: string;
+    estatus?: string;
+    cursorFechaCreacion?: string;
+    pageSize?: number;
+
+  }): Promise<Order[]> {
+
+    const params = {
+      fechaInicio,
+      fechaFin,
+      estatus,
+      cursorFechaCreacion,
+      pageSize
+    };
+
+    const filteredParams = Object.fromEntries(
+      Object.entries(params).filter(([_, v]) => v !== undefined && v !== null && v !== "")
+    );
+
+    const queryString = new URLSearchParams(
+      Object.entries(filteredParams).reduce<Record<string, string>>((acc, [k, v]) => {
+        acc[k] = String(v);
+        return acc;
+      }, {})
+    ).toString();
+
+    const response = await this.get<PaginatedOrdersResponse>(
+      `/api/pedidos?${queryString}`);
     
     // Handle the correct response structure
     if (response && Array.isArray(response.pedidos)) {
@@ -250,12 +284,47 @@ class ApiService {
     }
   }
 
-  async getOrdersPublic(): Promise<Order[]> {
-    const response = await this.get<PaginatedOrdersResponse>('/api/public/pedidos?estatus=ALL&pageSize=100');
+  
+
+  async getOrdersPublic({ fechaInicio,
+    fechaFin,
+    estatus = 'ALL',
+    cursorFechaCreacion,
+    pageSize = 100,
+  }: {
+    fechaInicio?: string;
+    fechaFin?: string;
+    estatus?: string;
+    cursorFechaCreacion?: string;
+    pageSize?: number;
+
+  }): Promise<Order[]> {
+    const params = {
+      fechaInicio,
+      fechaFin,
+      estatus,
+      cursorFechaCreacion,
+      pageSize
+    };
+
+    const filteredParams = Object.fromEntries(
+      Object.entries(params).filter(([_, v]) => v !== undefined && v !== null && v !== "")
+    );
+
+    const queryString = new URLSearchParams(
+      Object.entries(filteredParams).reduce<Record<string, string>>((acc, [k, v]) => {
+        acc[k] = String(v);
+        return acc;
+      }, {})
+    ).toString();
+
+    const response = await this.get<PaginatedOrdersResponse>(
+      `/api/public/pedidos?${queryString}`);
     
     // Handle the correct response structure
-    if (response && Array.isArray(response.pedidos)) {
-      return response.pedidos;
+    console.log('response', response);
+    if (response && Array.isArray(response)) {
+      return response;
     } else {
       return [];
     }

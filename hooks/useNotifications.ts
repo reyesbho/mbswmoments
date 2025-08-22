@@ -25,14 +25,17 @@ export const useNotifications = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [permissionStatus, setPermissionStatus] = useState<string>('unknown');
 
-  // Cargar configuración inicial
+  // Cargar configuración inicial e inicializar notificaciones
   useEffect(() => {
-    const loadSettings = () => {
+    const initializeNotifications = async () => {
       const currentSettings = notificationService.getSettings();
       setSettings(currentSettings);
+      
+      // Inicializar notificaciones para funcionar en segundo plano
+      await notificationService.initialize();
     };
 
-    loadSettings();
+    initializeNotifications();
   }, []);
 
   // Verificar permisos al montar el componente
