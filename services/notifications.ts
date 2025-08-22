@@ -150,24 +150,21 @@ export class NotificationService {
     // Cancelar notificaciones existentes
     await this.cancelAllNotifications();
 
-    // Programar para cada día de la semana configurado
-    for (const dayOfWeek of this.settings.daysOfWeek) {
-      const [hours, minutes] = this.settings.time.split(':').map(Number);
-      
-             await Notifications.scheduleNotificationAsync({
-         content: {
-           title: NOTIFICATION_CONFIG.TITLES.DAILY_SUMMARY,
-           body: "Revisa los pedidos programados para hoy",
-           data: { type: NOTIFICATION_TYPES.DAILY_SUMMARY },
-         },
-        trigger: {
-          hour: hours,
-          minute: minutes,
-          weekday: dayOfWeek + 1, // Expo usa 1-7, nosotros 0-6
-          repeats: true,
-        },
-      });
-    }
+    // Programar una sola notificación diaria que se repite todos los días
+    const [hours, minutes] = this.settings.time.split(':').map(Number);
+    
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: NOTIFICATION_CONFIG.TITLES.DAILY_SUMMARY,
+        body: "Revisa los pedidos programados para hoy",
+        data: { type: NOTIFICATION_TYPES.DAILY_SUMMARY },
+      },
+      trigger: {
+        hour: hours,
+        minute: minutes,
+        repeats: true,
+      },
+    });
 
     console.log('Notificación diaria programada');
   }
