@@ -50,6 +50,11 @@ export default function OrderDetailScreen() {
   // Add product modal states
   const [showAddProductModal, setShowAddProductModal] = useState(false);
 
+  // Función para verificar si el pedido está en un estado que no permita modificaciones
+  const isOrderReadOnly = (order: Order): boolean => {
+    return order.estatus === 'CANCELED' || order.estatus === 'DONE' || order.estatus === 'DELETE';
+  };
+
   const formatDeliveryDate = (timestamp: { seconds: number; nanoseconds: number }) => {
     const date = new Date(timestamp.seconds * 1000);
     return format(date, 'dd/MM/yyyy HH:mm');
@@ -84,6 +89,10 @@ export default function OrderDetailScreen() {
 
   const handleEditCliente = () => {
     if (!order) return;
+    if (isOrderReadOnly(order)) {
+      showError('No se puede modificar un pedido en estado ' + getStatusText(order));
+      return;
+    }
     setEditingCliente(order.cliente);
     setIsEditingCliente(true);
   };
@@ -105,6 +114,10 @@ export default function OrderDetailScreen() {
 
   const handleEditLugarEntrega = () => {
     if (!order) return;
+    if (isOrderReadOnly(order)) {
+      showError('No se puede modificar un pedido en estado ' + getStatusText(order));
+      return;
+    }
     setEditingLugarEntrega(order.lugarEntrega || '');
     setIsEditingLugarEntrega(true);
   };
@@ -121,6 +134,10 @@ export default function OrderDetailScreen() {
 
   const handleEditFecha = () => {
     if (!order) return;
+    if (isOrderReadOnly(order)) {
+      showError('No se puede modificar un pedido en estado ' + getStatusText(order));
+      return;
+    }
     const currentDate = new Date(order.fechaEntrega.seconds * 1000);
     setEditingFecha(currentDate);
     setEditingHora(currentDate);
@@ -129,6 +146,10 @@ export default function OrderDetailScreen() {
 
   const handleEditHora = () => {
     if (!order) return;
+    if (isOrderReadOnly(order)) {
+      showError('No se puede modificar un pedido en estado ' + getStatusText(order));
+      return;
+    }
     const currentDate = new Date(order.fechaEntrega.seconds * 1000);
     setEditingHora(currentDate);
     setIsEditingHora(true);
@@ -175,6 +196,13 @@ export default function OrderDetailScreen() {
   };
 
   const handleSaveAllChanges = async () => {
+    if (!order) return;
+    
+    if (isOrderReadOnly(order)) {
+      showError('No se puede modificar un pedido en estado ' + getStatusText(order));
+      return;
+    }
+    
     if (Object.keys(localChanges).length === 0) {
       showError('No hay cambios para guardar');
       return;
@@ -205,11 +233,21 @@ export default function OrderDetailScreen() {
   };
 
   const handleAddProduct = () => {
+    if (!order) return;
+    if (isOrderReadOnly(order)) {
+      showError('No se puede modificar un pedido en estado ' + getStatusText(order));
+      return;
+    }
     setShowAddProductModal(true);
   };
 
   const handleDeleteProduct = (productIndex: number) => {
     if (!order) return;
+    
+    if (isOrderReadOnly(order)) {
+      showError('No se puede modificar un pedido en estado ' + getStatusText(order));
+      return;
+    }
     
     Alert.alert(
       'Eliminar Producto',
@@ -240,6 +278,13 @@ export default function OrderDetailScreen() {
   };
 
   const handleConfirmOrder = () => {
+    if (!order) return;
+    
+    if (isOrderReadOnly(order)) {
+      showError('No se puede modificar un pedido en estado ' + getStatusText(order));
+      return;
+    }
+    
     Alert.alert(
       'Confirmar Pedido',
       '¿Estás seguro de que quieres confirmar este pedido? Esto cambiará el estatus a "Por hacer".',
@@ -325,8 +370,9 @@ export default function OrderDetailScreen() {
           </View>
           <Text style={styles.orderId}>Pedido #{order.id.slice(-8)}</Text>
           
-          {/* Confirm Order Button - Only show if not already confirmed */}
-          {(!order.estatus || order.estatus === 'INCOMPLETE') && (
+          
+          {/* Confirm Order Button - Only show if not already confirmed and not in read-only state */}
+          {(!order.estatus || order.estatus === 'INCOMPLETE') && !isOrderReadOnly(order) && (
             <TouchableOpacity 
               style={styles.confirmButton}
               onPress={handleConfirmOrder}
@@ -378,9 +424,11 @@ export default function OrderDetailScreen() {
                   ]}>
                     {localChanges.cliente || order.cliente}
                   </Text>
-                  <TouchableOpacity onPress={handleEditCliente} style={styles.editIcon}>
-                    <Ionicons name="create-outline" size={16} color="#4ECDC4" />
-                  </TouchableOpacity>
+                  {!isOrderReadOnly(order) && (
+                    <TouchableOpacity onPress={handleEditCliente} style={styles.editIcon}>
+                      <Ionicons name="create-outline" size={16} color="#4ECDC4" />
+                    </TouchableOpacity>
+                  )}
                 </View>
               )}
             </View>
@@ -416,9 +464,11 @@ export default function OrderDetailScreen() {
                   ]}>
                     {localChanges.lugarEntrega !== undefined ? localChanges.lugarEntrega : (order.lugarEntrega || 'No especificada')}
                   </Text>
-                  <TouchableOpacity onPress={handleEditLugarEntrega} style={styles.editIcon}>
-                    <Ionicons name="create-outline" size={16} color="#4ECDC4" />
-                  </TouchableOpacity>
+                  {!isOrderReadOnly(order) && (
+                    <TouchableOpacity onPress={handleEditLugarEntrega} style={styles.editIcon}>
+                      <Ionicons name="create-outline" size={16} color="#4ECDC4" />
+                    </TouchableOpacity>
+                  )}
                 </View>
               )}
             </View>
@@ -444,9 +494,11 @@ export default function OrderDetailScreen() {
                       : format(new Date(order.fechaEntrega.seconds * 1000), 'dd/MM/yyyy')
                     }
                   </Text>
-                  <TouchableOpacity onPress={handleEditFecha} style={styles.editIcon}>
-                    <Ionicons name="create-outline" size={16} color="#4ECDC4" />
-                  </TouchableOpacity>
+                  {!isOrderReadOnly(order) && (
+                    <TouchableOpacity onPress={handleEditFecha} style={styles.editIcon}>
+                      <Ionicons name="create-outline" size={16} color="#4ECDC4" />
+                    </TouchableOpacity>
+                  )}
                 </View>
               )}
             </View>
@@ -472,16 +524,18 @@ export default function OrderDetailScreen() {
                       : format(new Date(order.fechaEntrega.seconds * 1000), 'HH:mm')
                     }
                   </Text>
-                  <TouchableOpacity onPress={handleEditHora} style={styles.editIcon}>
-                    <Ionicons name="create-outline" size={16} color="#4ECDC4" />
-                  </TouchableOpacity>
+                  {!isOrderReadOnly(order) && (
+                    <TouchableOpacity onPress={handleEditHora} style={styles.editIcon}>
+                      <Ionicons name="create-outline" size={16} color="#4ECDC4" />
+                    </TouchableOpacity>
+                  )}
                 </View>
               )}
             </View>
           </View>
 
           {/* Save/Discard Changes Buttons */}
-          {Object.keys(localChanges).length > 0 && (
+          {Object.keys(localChanges).length > 0 && !isOrderReadOnly(order) && (
             <View style={styles.changesActions}>
               <TouchableOpacity 
                 onPress={handleDiscardChanges} 
@@ -508,10 +562,12 @@ export default function OrderDetailScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Productos</Text>
-            <TouchableOpacity onPress={handleAddProduct} style={styles.addProductButton}>
-              <Ionicons name="add" size={20} color="white" />
-              <Text style={styles.addProductButtonText}>Agregar</Text>
-            </TouchableOpacity>
+            {!isOrderReadOnly(order) && (
+              <TouchableOpacity onPress={handleAddProduct} style={styles.addProductButton}>
+                <Ionicons name="add" size={20} color="white" />
+                <Text style={styles.addProductButtonText}>Agregar</Text>
+              </TouchableOpacity>
+            )}
           </View>
           
           {order.productos.map((producto, index) => (
@@ -544,9 +600,11 @@ export default function OrderDetailScreen() {
                   Subtotal: ${(producto.precio * producto.cantidad).toFixed(2)}
                 </Text>
               </View>
-              <TouchableOpacity onPress={() => handleDeleteProduct(index)} style={styles.deleteProductButton}>
-                <Ionicons name="trash-outline" size={18} color="#E74C3C" />
-              </TouchableOpacity>
+              {!isOrderReadOnly(order) && (
+                <TouchableOpacity onPress={() => handleDeleteProduct(index)} style={styles.deleteProductButton}>
+                  <Ionicons name="trash-outline" size={18} color="#E74C3C" />
+                </TouchableOpacity>
+              )}
             </View>
           ))}
         </View>
@@ -1424,5 +1482,19 @@ const styles = StyleSheet.create({
     padding: 8,
     backgroundColor: '#FDE8E8',
     borderRadius: 6,
+  },
+  readOnlyIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+    padding: 8,
+    backgroundColor: '#F8F9FA',
+    borderRadius: 6,
+    gap: 6,
+  },
+  readOnlyText: {
+    fontSize: 12,
+    color: '#7F8C8D',
+    fontStyle: 'italic',
   },
 }); 
