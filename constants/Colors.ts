@@ -29,6 +29,16 @@ const successGreen = '#10B981';
 const warningYellow = '#F59E0B';
 const errorRed = '#EF4444';
 
+// Order status colors
+export const OrderStatusColors = {
+  DONE: '#72DD76',
+  BACKLOG: '#E2E539',
+  CANCELED: '#FF6262',
+  INCOMPLETE: '#e08032',
+  DELETE: '#FF6262', // Same as CANCELED
+  PENDING: '#F59E0B', // Default warning color for pending orders
+} as const;
+
 export const Colors = {
   light: {
     // Text colors

@@ -1,3 +1,4 @@
+import { OrderStatusColors } from "@/constants/Colors";
 import { Product } from "@/types";
 import { Ionicons } from "@expo/vector-icons";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -24,7 +25,7 @@ export function ProductItem({ product, handleToggleStatus, handleEditProduct, ha
                     onPress={() => handleToggleStatus(product)}
                     style={[
                       styles.statusButton,
-                      { backgroundColor: product.estatus ? '#27AE60' : '#E74C3C' },
+                      { backgroundColor: product.estatus ? OrderStatusColors.DONE : OrderStatusColors.CANCELED },
                     ]}
                   >
                     <Ionicons
@@ -43,14 +44,14 @@ export function ProductItem({ product, handleToggleStatus, handleEditProduct, ha
                     onPress={() => handleDeleteProduct(product)}
                     style={styles.actionButton}
                   >
-                    <Ionicons name="trash-outline" size={20} color="#E74C3C" />
+                    <Ionicons name="trash-outline" size={20} color={OrderStatusColors.CANCELED} />
                   </TouchableOpacity>
                 </View>
               </View>
               <View style={styles.productStatus}>
                 <Text style={[
                   styles.statusText,
-                  { color: product.estatus ? '#27AE60' : '#E74C3C' },
+                  { color: product.estatus ? OrderStatusColors.DONE : OrderStatusColors.CANCELED },
                 ]}>
                   {product.estatus ? 'Activo' : 'Inactivo'}
                 </Text>

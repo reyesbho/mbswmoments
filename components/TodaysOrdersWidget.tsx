@@ -1,3 +1,4 @@
+import { OrderStatusColors } from '@/constants/Colors';
 import { notificationService } from '@/services/notifications';
 import { Order } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
@@ -70,7 +71,7 @@ export default function TodaysOrdersWidget({ onPress }: TodaysOrdersWidgetProps)
           <Text style={styles.title}>Pedidos de Hoy</Text>
         </View>
         <View style={styles.emptyContainer}>
-          <Ionicons name="checkmark-circle-outline" size={32} color="#27AE60" />
+          <Ionicons name="checkmark-circle-outline" size={32} color={OrderStatusColors.DONE} />
           <Text style={styles.emptyText}>No hay pedidos para hoy</Text>
           <Text style={styles.emptySubtext}>¡Excelente trabajo!</Text>
         </View>
@@ -97,7 +98,7 @@ export default function TodaysOrdersWidget({ onPress }: TodaysOrdersWidgetProps)
           </Text>
           {urgentCount > 0 && (
             <View style={styles.urgentIndicator}>
-              <Ionicons name="warning" size={16} color="#E74C3C" />
+              <Ionicons name="warning" size={16} color={OrderStatusColors.CANCELED} />
               <Text style={styles.urgentText}>{urgentCount} urgente{urgentCount !== 1 ? 's' : ''}</Text>
             </View>
           )}
@@ -143,18 +144,19 @@ export default function TodaysOrdersWidget({ onPress }: TodaysOrdersWidgetProps)
 }
 
 const getStatusColor = (order: Order) => {
-  if (order.estatus === 'DONE') return '#27AE60';
-  if (order.estatus === 'CANCELED') return '#E74C3C';
-  if (order.estatus === 'INCOMPLETE') return '#E67E22';
-  if (order.estatus === 'BACKLOG') return '#9B59B6';
+  if (order.estatus === 'DONE') return OrderStatusColors.DONE;
+  if (order.estatus === 'CANCELED') return OrderStatusColors.CANCELED;
+  if (order.estatus === 'INCOMPLETE') return OrderStatusColors.INCOMPLETE;
+  if (order.estatus === 'BACKLOG') return OrderStatusColors.BACKLOG;
+  if (order.estatus === 'DELETE') return OrderStatusColors.DELETE;
   
   const deliveryDate = new Date(order.fechaEntrega.seconds * 1000);
   const now = new Date();
   const diffHours = (deliveryDate.getTime() - now.getTime()) / (1000 * 60 * 60);
   
-  if (diffHours < 0) return '#E74C3C';
-  if (diffHours < 4) return '#F39C12';
-  return '#27AE60';
+  if (diffHours < 0) return OrderStatusColors.CANCELED;
+  if (diffHours < 4) return OrderStatusColors.INCOMPLETE;
+  return OrderStatusColors.DONE;
 };
 
 const styles = StyleSheet.create({
@@ -183,7 +185,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   urgentBadge: {
-    backgroundColor: '#E74C3C',
+    backgroundColor: OrderStatusColors.CANCELED,
     borderRadius: 12,
     minWidth: 20,
     height: 20,
@@ -212,7 +214,7 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#27AE60',
+    color: OrderStatusColors.DONE,
     marginTop: 8,
   },
   emptySubtext: {
@@ -241,7 +243,7 @@ const styles = StyleSheet.create({
   },
   urgentText: {
     fontSize: 14,
-    color: '#E74C3C',
+    color: OrderStatusColors.CANCELED,
     fontWeight: '600',
   },
   ordersPreview: {

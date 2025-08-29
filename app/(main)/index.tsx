@@ -1,5 +1,6 @@
 import { HeaderView } from '@/components/HeaderView';
 import Toast, { useToast } from '@/components/Toast';
+import { OrderStatusColors } from '@/constants/Colors';
 import { useOrders, useUpdateOrder } from '@/hooks/useApi';
 import { Order } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
@@ -7,12 +8,12 @@ import { format } from 'date-fns';
 import { useRouter } from 'expo-router';
 import React, { useMemo, useState } from 'react';
 import {
-  FlatList,
-  RefreshControl,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
+    FlatList,
+    RefreshControl,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View
 } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, withRepeat, withTiming } from 'react-native-reanimated';
@@ -125,19 +126,20 @@ export default function OrdersScreen() {
 
   const getStatusColor = (order: Order) => {
     // Si el pedido tiene un estado específico, usarlo
-    if (order.estatus === 'DONE') return '#27AE60'; // Verde para entregado
-    if (order.estatus === 'CANCELED') return '#E74C3C'; // Rojo para cancelado
-    if (order.estatus === 'INCOMPLETE') return '#E67E22'; // Naranja para incompleto
-    if (order.estatus === 'BACKLOG') return '#9B59B6'; // Púrpura para por hacer
+    if (order.estatus === 'DONE') return OrderStatusColors.DONE;
+    if (order.estatus === 'CANCELED') return OrderStatusColors.CANCELED;
+    if (order.estatus === 'INCOMPLETE') return OrderStatusColors.INCOMPLETE;
+    if (order.estatus === 'BACKLOG') return OrderStatusColors.BACKLOG;
+    if (order.estatus === 'DELETE') return OrderStatusColors.DELETE;
     
     // Si no tiene estado, usar la lógica de fecha
     const deliveryDate = new Date(order.fechaEntrega.seconds * 1000);
     const now = new Date();
     const diffHours = (deliveryDate.getTime() - now.getTime()) / (1000 * 60 * 60);
     
-    if (diffHours < 0) return '#E74C3C'; // Overdue
-    if (diffHours < 24) return '#F39C12'; // Today
-    return '#27AE60'; // Upcoming
+    if (diffHours < 0) return OrderStatusColors.CANCELED; // Overdue
+    if (diffHours < 24) return OrderStatusColors.INCOMPLETE; // Today
+    return OrderStatusColors.DONE; // Upcoming
   };
 
   const getStatusText = (order: Order) => {
@@ -145,6 +147,7 @@ export default function OrdersScreen() {
     if (order.estatus === 'CANCELED') return 'Cancelado';
     if (order.estatus === 'INCOMPLETE') return 'Incompleto';
     if (order.estatus === 'BACKLOG') return 'Por hacer';
+    if (order.estatus === 'DELETE') return 'Eliminado';
     return 'Pendiente';
   };
 
@@ -670,7 +673,7 @@ const styles = StyleSheet.create({
   orderTotal: {
     fontSize: 16,
     fontWeight: 'bold',
-    color: '#27AE60',
+    color: OrderStatusColors.DONE,
   },
   orderLocation: {
     fontSize: 12,
@@ -696,7 +699,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   swipeRightAction: {
-    backgroundColor: '#27AE60',
+    backgroundColor: OrderStatusColors.DONE,
     justifyContent: 'center',
     alignItems: 'center',
     width: 80,
@@ -705,7 +708,7 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 12,
   },
   swipeLeftAction: {
-    backgroundColor: '#E74C3C',
+    backgroundColor: OrderStatusColors.CANCELED,
     justifyContent: 'center',
     alignItems: 'center',
     width: 80,
