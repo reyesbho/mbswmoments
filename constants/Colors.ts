@@ -42,12 +42,11 @@ export const getStatusColor = (order: Order) => {
 
 // Order status colors - Paleta suave y accesible
 export const OrderStatusColors = {
-  DONE: '#059669',        // Verde bosque - Completado
-  BACKLOG: '#D97706',     // Ámbar suave - Pendiente
-  CANCELED: '#DC2626',    // Rojo - Cancelado
-  INCOMPLETE: '#EA580C',  // Naranja - Incompleto
-  DELETE: '#B91C1C',      // Rojo oscuro - Eliminado
-  PENDING: '#2563EB',     // Azul - En proceso
+  DONE: '#10B981',        // Verde bosque - Completado
+  BACKLOG: '#F59E0B',     // Ámbar suave - Pendiente
+  CANCELED: '#EF4444',    // Rojo - Cancelado
+  INCOMPLETE: '#F97316',  // Naranja - Incompleto
+  DELETE: '#DC2626',      // Rojo oscuro - Eliminado
 } as const;
 
 export const Colors = {
