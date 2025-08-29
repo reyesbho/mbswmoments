@@ -1,18 +1,19 @@
 import { HeaderView } from '@/components/HeaderView';
 import { useCalendarOrders } from '@/hooks/useCalendarOrders';
 import { Order } from '@/types';
-import { formatDate, formatMonthYear, formatTime, getDayName } from '@/utils/dateUtils';
+import { formatMonthYear, formatTime, getDayName, getDayOfMonth } from '@/utils/dateUtils';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { parse } from 'date-fns';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    ActivityIndicator,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 export default function CalendarScreen() {
@@ -66,9 +67,9 @@ export default function CalendarScreen() {
   );
 
   const renderDaySection = (dateKey: string, dayOrders: Order[]) => {
-    const date = new Date(dateKey);
+    const date = parse(dateKey, 'yyyy-MM-dd', new Date());
     const dayName = getDayName(date);
-    const formattedDate = formatDate(date);
+    const formattedDate = getDayOfMonth(date);
 
     return (
       <View key={dateKey} style={styles.dayCard}>
