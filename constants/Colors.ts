@@ -3,6 +3,8 @@
  * Modern dark theme with blue accents for a professional look
  */
 
+import { Order } from "@/types";
+
 // Primary brand colors
 const primaryBlue = '#2563EB'; // Main blue accent
 const primaryBlueLight = '#3B82F6'; // Lighter blue for hover states
@@ -28,6 +30,15 @@ const neutral900 = '#0F172A';
 const successGreen = '#10B981';
 const warningYellow = '#F59E0B';
 const errorRed = '#EF4444';
+
+export const getStatusColor = (order: Order) => {
+  // Si el pedido tiene un estado específico, usarlo
+  if (order.estatus === 'DONE') return OrderStatusColors.DONE;
+  if (order.estatus === 'CANCELED') return OrderStatusColors.CANCELED;
+  if (order.estatus === 'INCOMPLETE') return OrderStatusColors.INCOMPLETE;
+  if (order.estatus === 'BACKLOG') return OrderStatusColors.BACKLOG;
+  if (order.estatus === 'DELETE') return OrderStatusColors.DELETE;
+}
 
 // Order status colors
 export const OrderStatusColors = {

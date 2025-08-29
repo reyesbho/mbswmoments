@@ -1,5 +1,5 @@
 import Toast, { useToast } from '@/components/Toast';
-import { OrderStatusColors } from '@/constants/Colors';
+import { getStatusColor } from '@/constants/Colors';
 import { useOrder, useProducts, useSizes, useUpdateOrder } from '@/hooks/useApi';
 import { Order, OrderProduct, Product, SizeProduct } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
@@ -9,15 +9,15 @@ import { format } from 'date-fns';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
-    Alert,
-    Image,
-    Modal,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Image,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 export default function OrderDetailScreen() {
@@ -61,25 +61,6 @@ export default function OrderDetailScreen() {
     }, 0);
   };
 
-  const getStatusColor = (order: Order) => {
-    // Si el pedido tiene un estatus específico, usarlo
-    if (order.estatus) {
-      if (order.estatus === 'DONE') return OrderStatusColors.DONE;
-      if (order.estatus === 'CANCELED') return OrderStatusColors.CANCELED;
-      if (order.estatus === 'INCOMPLETE') return OrderStatusColors.INCOMPLETE;
-      if (order.estatus === 'BACKLOG') return OrderStatusColors.BACKLOG;
-      if (order.estatus === 'DELETE') return OrderStatusColors.DELETE;
-    }
-    
-    // Lógica original basada en fecha
-    const deliveryDate = new Date(order.fechaEntrega.seconds * 1000);
-    const now = new Date();
-    const diffHours = (deliveryDate.getTime() - now.getTime()) / (1000 * 60 * 60);
-    
-    if (diffHours < 0) return OrderStatusColors.CANCELED; // Overdue
-    if (diffHours < 24) return OrderStatusColors.INCOMPLETE; // Today
-    return OrderStatusColors.DONE; // Upcoming
-  };
 
   const getStatusText = (order: Order) => {
     // Si el pedido tiene un estatus específico, usarlo

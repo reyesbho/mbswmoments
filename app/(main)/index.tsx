@@ -1,6 +1,6 @@
 import { HeaderView } from '@/components/HeaderView';
 import Toast, { useToast } from '@/components/Toast';
-import { OrderStatusColors } from '@/constants/Colors';
+import { getStatusColor, OrderStatusColors } from '@/constants/Colors';
 import { useOrders, useUpdateOrder } from '@/hooks/useApi';
 import { Order } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
@@ -122,24 +122,6 @@ export default function OrdersScreen() {
     return order.productos.reduce((total, producto) => {
       return total + (producto.precio * producto.cantidad);
     }, 0);
-  };
-
-  const getStatusColor = (order: Order) => {
-    // Si el pedido tiene un estado específico, usarlo
-    if (order.estatus === 'DONE') return OrderStatusColors.DONE;
-    if (order.estatus === 'CANCELED') return OrderStatusColors.CANCELED;
-    if (order.estatus === 'INCOMPLETE') return OrderStatusColors.INCOMPLETE;
-    if (order.estatus === 'BACKLOG') return OrderStatusColors.BACKLOG;
-    if (order.estatus === 'DELETE') return OrderStatusColors.DELETE;
-    
-    // Si no tiene estado, usar la lógica de fecha
-    const deliveryDate = new Date(order.fechaEntrega.seconds * 1000);
-    const now = new Date();
-    const diffHours = (deliveryDate.getTime() - now.getTime()) / (1000 * 60 * 60);
-    
-    if (diffHours < 0) return OrderStatusColors.CANCELED; // Overdue
-    if (diffHours < 24) return OrderStatusColors.INCOMPLETE; // Today
-    return OrderStatusColors.DONE; // Upcoming
   };
 
   const getStatusText = (order: Order) => {

@@ -1,15 +1,15 @@
-import { OrderStatusColors } from '@/constants/Colors';
+import { getStatusColor, OrderStatusColors } from '@/constants/Colors';
 import { notificationService } from '@/services/notifications';
 import { Order } from '@/types';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-    ActivityIndicator,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 interface TodaysOrdersWidgetProps {
@@ -143,21 +143,6 @@ export default function TodaysOrdersWidget({ onPress }: TodaysOrdersWidgetProps)
   );
 }
 
-const getStatusColor = (order: Order) => {
-  if (order.estatus === 'DONE') return OrderStatusColors.DONE;
-  if (order.estatus === 'CANCELED') return OrderStatusColors.CANCELED;
-  if (order.estatus === 'INCOMPLETE') return OrderStatusColors.INCOMPLETE;
-  if (order.estatus === 'BACKLOG') return OrderStatusColors.BACKLOG;
-  if (order.estatus === 'DELETE') return OrderStatusColors.DELETE;
-  
-  const deliveryDate = new Date(order.fechaEntrega.seconds * 1000);
-  const now = new Date();
-  const diffHours = (deliveryDate.getTime() - now.getTime()) / (1000 * 60 * 60);
-  
-  if (diffHours < 0) return OrderStatusColors.CANCELED;
-  if (diffHours < 4) return OrderStatusColors.INCOMPLETE;
-  return OrderStatusColors.DONE;
-};
 
 const styles = StyleSheet.create({
   container: {

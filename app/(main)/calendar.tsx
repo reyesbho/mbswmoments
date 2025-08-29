@@ -1,4 +1,5 @@
 import { HeaderView } from '@/components/HeaderView';
+import { getStatusColor } from '@/constants/Colors';
 import { useCalendarOrders } from '@/hooks/useCalendarOrders';
 import { Order } from '@/types';
 import { formatMonthYear, formatTime, getDayName, getDayOfMonth } from '@/utils/dateUtils';
@@ -39,11 +40,12 @@ export default function CalendarScreen() {
   const handleOrderPress = (orderId: string) => {
     router.push(`/orders/${orderId}`);
   };
+  
 
   const renderOrderItem = (order: Order) => (
     <TouchableOpacity 
       key={order.id} 
-      style={styles.orderItem}
+      style={[styles.orderItem, { borderTopColor: getStatusColor(order) }]}
       onPress={() => handleOrderPress(order.id)}
       activeOpacity={0.7}
     >
@@ -248,8 +250,8 @@ const styles = StyleSheet.create({
     padding: 5,
     borderRadius: 8,
     marginBottom: 8,
-    borderLeftWidth: 3,
-    borderLeftColor: '#4ECDC4',
+    borderTopWidth: 3,
+    borderTopColor: '#4ECDC4',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
