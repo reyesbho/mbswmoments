@@ -40,14 +40,14 @@ export const getStatusColor = (order: Order) => {
   if (order.estatus === 'DELETE') return OrderStatusColors.DELETE;
 }
 
-// Order status colors
+// Order status colors - Paleta suave y accesible
 export const OrderStatusColors = {
-  DONE: '#72DD76',
-  BACKLOG: '#E2E539',
-  CANCELED: '#FF6262',
-  INCOMPLETE: '#e08032',
-  DELETE: '#FF6262', // Same as CANCELED
-  PENDING: '#F59E0B', // Default warning color for pending orders
+  DONE: '#059669',        // Verde bosque - Completado
+  BACKLOG: '#D97706',     // Ámbar suave - Pendiente
+  CANCELED: '#DC2626',    // Rojo - Cancelado
+  INCOMPLETE: '#EA580C',  // Naranja - Incompleto
+  DELETE: '#B91C1C',      // Rojo oscuro - Eliminado
+  PENDING: '#2563EB',     // Azul - En proceso
 } as const;
 
 export const Colors = {
